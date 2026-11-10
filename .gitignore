@@ -18,6 +18,7 @@ DerivedData/
 # IPA builds
 ipa_build/
 *.ipa
+!release_assets/*.ipa
 PickupCodeWidget/PickupCodeWidget
 PickupCodeWidget/_CodeSignature/
 

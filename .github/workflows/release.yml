@@ -1,0 +1,33 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG_NAME="${{ github.ref_name }}"
+          if [ -z "$TAG_NAME" ] || [ "$TAG_NAME" = "main" ]; then
+            TAG_NAME="v1.0.0"
+          fi
+          gh release create "$TAG_NAME" \
+            "release_assets/取件快码-1.0.ipa" \
+            "Shortcuts/取件快码_二合一.shortcut" \
+            "Shortcuts/取件身份码.shortcut" \
+            "Shortcuts/快递待取.shortcut" \
+            --title "取件快码 $TAG_NAME 正式发布" \
+            --notes-file RELEASE_NOTES.md

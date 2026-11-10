@@ -117,7 +117,7 @@ struct ContentView: View {
                     .font(.system(size: 28, weight: .bold, design: .rounded))
                     .foregroundColor(primaryTextColor)
                 
-                Text("三个身份码 · 六个查件入口")
+                Text("三个身份码 · 七个查件入口")
                     .font(.system(size: 13, weight: .medium))
                     .foregroundColor(secondaryTextColor)
             }
@@ -215,7 +215,7 @@ struct ContentView: View {
         let defaultCode: [EntryKey] = [.taobaoCode, .jdCode, .pddCode]
         let defaultQuery: [EntryKey] = [
             .taobaoPending, .jdPending, .pddPending,
-            .douyinPending, .kuaishouPending, .dewuPending
+            .douyinPending, .kuaishouPending, .dewuPending, .xhsPending
         ]
         
         if let savedCode = prefs.string(forKey: keyOrderCode) {

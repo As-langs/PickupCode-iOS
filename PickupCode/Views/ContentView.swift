@@ -7,9 +7,13 @@ struct ContentView: View {
     
     @State private var showingSettings = false
     @State private var isEditingOrder = false
+    @Environment(\.scenePhase) private var scenePhase
     
-    @State private var codeEntries: [EntryKey] = []
-    @State private var queryEntries: [EntryKey] = []
+    @State private var codeEntries: [EntryKey] = [.taobaoCode, .jdCode, .pddCode]
+    @State private var queryEntries: [EntryKey] = [
+        .taobaoPending, .jdPending, .pddPending,
+        .douyinPending, .kuaishouPending, .dewuPending, .xhsPending
+    ]
     
     private let prefs = UserDefaults.standard
     private let keyOrderCode = "order_code"
@@ -102,7 +106,14 @@ struct ContentView: View {
         .onAppear {
             loadOrder()
         }
-        .sheet(isPresented: $showingSettings) {
+        .onChange(of: scenePhase) { newPhase in
+            if newPhase == .active {
+                loadOrder()
+            }
+        }
+        .sheet(isPresented: $showingSettings, onDismiss: {
+            loadOrder()
+        }) {
             SettingsView()
                 .environmentObject(themeManager)
         }
@@ -229,16 +240,21 @@ struct ContentView: View {
         if let savedQuery = prefs.string(forKey: keyOrderQuery) {
             let keys = savedQuery.split(separator: ",").map { String($0).trimmingCharacters(in: .whitespaces) }
             let loaded = keys.compactMap { EntryKey(rawValue: $0) }
-            let valid = loaded.filter { defaultQuery.contains($0) }
-            var result = valid
+            var result = loaded.filter { defaultQuery.contains($0) }
+            var hasNew = false
             for item in defaultQuery {
                 if !result.contains(item) {
                     result.append(item)
+                    hasNew = true
                 }
             }
             self.queryEntries = result.isEmpty ? defaultQuery : result
+            if hasNew {
+                saveOrder()
+            }
         } else {
             self.queryEntries = defaultQuery
+            saveOrder()
         }
     }
     

@@ -40,6 +40,24 @@ struct SettingsView: View {
                         }
                     }
                     
+                    // MARK: - Reset Order Section
+                    settingsSection(title: "入口与排序管理", subtitle: "长按主界面卡片右侧把手可自由拖拽自定义顺序") {
+                        Button(action: {
+                            UserDefaults.standard.removeObject(forKey: "order_code")
+                            UserDefaults.standard.removeObject(forKey: "order_query")
+                            dismiss()
+                        }) {
+                            HStack(spacing: 8) {
+                                Image(systemName: "arrow.counterclockwise")
+                                Text("重置默认排序（显示全部 7 个查件入口）")
+                                Spacer()
+                            }
+                            .foregroundColor(Color(hex: "00A870"))
+                            .font(.system(size: 14, weight: .semibold))
+                            .padding(.vertical, 4)
+                        }
+                    }
+                    
                     // MARK: - About & Credits Section
                     VStack(spacing: 8) {
                         Text("取件快码 v1.0.1 for iOS")

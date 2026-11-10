@@ -88,30 +88,71 @@ class PickupCodeManager: ObservableObject {
         let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return nil }
         
-        // 1. 识别快递公司
-        let companies: [(String, String)] = [
+        // 0. 提取短信签名抬头（如 【菜鸟驿站】、【丰巢】）并分离正文
+        var signature: String? = nil
+        var body = trimmed
+        if let sigRange = trimmed.range(of: #"^[【\[][^】\]]+[】\]]"#, options: .regularExpression) {
+            let fullSig = String(trimmed[sigRange])
+            signature = fullSig.trimmingCharacters(in: CharacterSet(charactersIn: "【】[]")).trimmingCharacters(in: .whitespacesAndNewlines)
+            body = String(trimmed[sigRange.upperBound...]).trimmingCharacters(in: .whitespacesAndNewlines)
+        }
+        
+        // 1. 识别快递承运商 / 快递公司
+        let couriers: [(String, String)] = [
             ("顺丰", "顺丰速运"),
-            ("京东", "京东快递"),
-            ("菜鸟", "菜鸟驿站"),
+            ("极兔", "极兔速递"),
             ("中通", "中通快递"),
             ("圆通", "圆通速递"),
             ("申通", "申通快递"),
             ("韵达", "韵达快递"),
-            ("极兔", "极兔速递"),
+            ("京东", "京东快递"),
+            ("德邦", "德邦快递"),
+            ("丹鸟", "丹鸟物流"),
+            ("邮政", "中国邮政"),
+            ("EMS", "EMS特快")
+        ]
+        
+        let stations: [(String, String)] = [
+            ("菜鸟", "菜鸟驿站"),
             ("丰巢", "丰巢智能柜"),
             ("多多", "多多驿站"),
             ("拼多多", "多多驿站"),
-            ("邮政", "中国邮政"),
-            ("EMS", "EMS特快"),
-            ("德邦", "德邦快递"),
-            ("丹鸟", "丹鸟物流")
+            ("京东派", "京东派")
         ]
         
         var matchedCompany = "快递包裹"
-        for (keyword, fullName) in companies {
-            if trimmed.contains(keyword) {
-                matchedCompany = fullName
+        // 优先匹配正文中明确提及的快递公司（如“您的极兔速递包裹”）
+        for (kw, name) in couriers {
+            if body.contains(kw) {
+                matchedCompany = name
                 break
+            }
+        }
+        // 次优匹配短信签名中的快递品牌（如【顺丰速运】）
+        if matchedCompany == "快递包裹", let sig = signature {
+            for (kw, name) in couriers {
+                if sig.contains(kw) {
+                    matchedCompany = name
+                    break
+                }
+            }
+        }
+        // 再次匹配自提网络品牌（如【菜鸟驿站】、【丰巢】）
+        if matchedCompany == "快递包裹", let sig = signature {
+            for (kw, name) in stations {
+                if sig.contains(kw) {
+                    matchedCompany = name
+                    break
+                }
+            }
+        }
+        // 最后匹配正文中的自提品牌
+        if matchedCompany == "快递包裹" {
+            for (kw, name) in stations {
+                if body.contains(kw) {
+                    matchedCompany = name
+                    break
+                }
             }
         }
         
@@ -156,25 +197,48 @@ class PickupCodeManager: ObservableObject {
         
         guard !matchedCode.isEmpty else { return nil }
         
-        // 3. 识别驿站 / 自提点 / 智能柜
+        // 3. 识别驿站 / 自提点 / 智能柜 / 门店
         var matchedLocation = "自提点"
-        let locationPatterns = [
-            "(?:到|至|在|存放于|请到|凭此码到|自提点[：:])\\s*([^，。！？,!?\\n]{2,30}?(?:驿站|自提点|智能柜|自提柜|号柜|超市|门卫|代收点|代管点|丰巢|小卖部|物业))",
-            "([^，。！？,!?\\n]{2,25}?(?:驿站|自提点|智能柜|自提柜|号柜|超市|代收点|丰巢))"
-        ]
         
-        for pat in locationPatterns {
-            if let regex = try? NSRegularExpression(pattern: pat) {
-                let ns = trimmed as NSString
-                if let match = regex.firstMatch(in: trimmed, options: [], range: NSRange(location: 0, length: ns.length)) {
-                    let range = match.numberOfRanges > 1 && match.range(at: 1).location != NSNotFound ? match.range(at: 1) : match.range(at: 0)
-                    let loc = ns.substring(with: range).trimmingCharacters(in: .whitespacesAndNewlines)
-                    if !loc.isEmpty && loc.count <= 35 {
+        // 模式 1：从引导词（到/至/在/存放于/自提点等）提取具体门店/地点，截止到取件动词或标点
+        let locPattern1 = #"(?:到|至|在|存放于|放置于|已送达|已到达|已存入|已到|自提点[：:\s]?|提货点[：:\s]?|取件点[：:\s]?|请到)\s*([^，。！？,!?\n]{2,35}?)(?:尽早取|尽快取|请及时取|及时取|请取|取件|取货|提取|领取|查收|逾期|过期|详询|如有|，|。|！|!|\n|$)"#
+        
+        // 模式 2：正文中包含驿站/柜机/门店/超市等具体词汇
+        let locPattern2 = #"([^，。！？,!?\n\s]{2,25}?(?:驿站|自提点|智能柜|自提柜|号柜|柜机|便利店|超市|门卫室|门卫|代收点|代管点|丰巢|小卖部|物业|收发室|传达室|大堂|前台|店))"#
+        
+        if let regex = try? NSRegularExpression(pattern: locPattern1) {
+            let ns = body as NSString
+            if let match = regex.firstMatch(in: body, options: [], range: NSRange(location: 0, length: ns.length)) {
+                let range = match.range(at: 1)
+                var loc = ns.substring(with: range).trimmingCharacters(in: .whitespacesAndNewlines)
+                loc = loc.replacingOccurrences(of: #"^(?:请凭|凭|在此|到|至|在|\s)+"#, with: "", options: .regularExpression)
+                loc = loc.trimmingCharacters(in: CharacterSet(charactersIn: "【】[]:：,，。!！?？ "))
+                if loc.contains("(") && !loc.contains(")") { loc.append(")") }
+                if loc.contains("（") && !loc.contains("）") { loc.append("）") }
+                loc = loc.trimmingCharacters(in: CharacterSet(charactersIn: "【】[]:：,，。!！?？ "))
+                if loc.count >= 2 {
+                    matchedLocation = loc
+                }
+            }
+        }
+        
+        if matchedLocation == "自提点" {
+            if let regex = try? NSRegularExpression(pattern: locPattern2) {
+                let ns = body as NSString
+                if let match = regex.firstMatch(in: body, options: [], range: NSRange(location: 0, length: ns.length)) {
+                    let range = match.range(at: 1)
+                    var loc = ns.substring(with: range).trimmingCharacters(in: .whitespacesAndNewlines)
+                    loc = loc.trimmingCharacters(in: CharacterSet(charactersIn: "【】[]:：,，。!！?？ "))
+                    if loc.count >= 2 {
                         matchedLocation = loc
-                        break
                     }
                 }
             }
+        }
+        
+        // 若正文未提取到具体门店，但签名中有明显自提属性，使用签名
+        if matchedLocation == "自提点", let sig = signature, (sig.contains("驿站") || sig.contains("柜") || sig.contains("点")) {
+            matchedLocation = sig
         }
         
         return PickupRecord(

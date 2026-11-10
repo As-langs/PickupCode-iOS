@@ -42,7 +42,7 @@ struct SettingsView: View {
                     
                     // MARK: - About & Credits Section
                     VStack(spacing: 8) {
-                        Text("取件快码 v1.0 for iOS")
+                        Text("取件快码 v1.0.1 for iOS")
                             .font(.system(size: 14, weight: .semibold))
                             .foregroundColor(.secondary)
                         

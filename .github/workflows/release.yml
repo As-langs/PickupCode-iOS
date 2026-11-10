@@ -25,8 +25,8 @@ jobs:
           draft: false
           prerelease: false
           files: |
-            release_assets/PickupCode-1.0.ipa
-            release_assets/取件快码-1.0.ipa
+            release_assets/PickupCode-1.0.1.ipa
+            release_assets/取件快码-1.0.1.ipa
             release_assets/PickupCode_AllInOne_取件快码.shortcut
             release_assets/PickupCode_ID_取件身份码.shortcut
             release_assets/PickupCode_Packages_快递待取.shortcut

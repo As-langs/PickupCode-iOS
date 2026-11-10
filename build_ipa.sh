@@ -5,7 +5,7 @@ PROJ_DIR="/Users/zouh/.gemini/antigravity/scratch/PickupCode-iOS"
 cd "$PROJ_DIR"
 
 echo "=== 1. Cleaning previous builds ==="
-rm -rf build ipa_build PickupCode-1.0.ipa
+rm -rf build ipa_build PickupCode-*.ipa 取件快码-*.ipa
 
 echo "=== 2. Building Main App with xcodebuild ==="
 xcodebuild clean build \
@@ -55,8 +55,9 @@ codesign -s - --force "$WIDGET_DIR" || true
 
 echo "=== 5. Zipping IPA ==="
 cd ipa_build
-zip -qry ../PickupCode-1.0.ipa Payload
+zip -qry ../PickupCode-1.0.1.ipa Payload
 cd ..
+cp PickupCode-1.0.1.ipa 取件快码-1.0.1.ipa
 
 echo "=== 6. Build Completed ==="
-ls -lh PickupCode-1.0.ipa
+ls -lh PickupCode-1.0.1.ipa 取件快码-1.0.1.ipa

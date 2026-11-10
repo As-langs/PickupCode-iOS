@@ -11,6 +11,7 @@
 </p>
 
 <p align="center">
+  <img src="https://img.shields.io/badge/Release-v1.0.1-brightgreen.svg" alt="Release">
   <img src="https://img.shields.io/badge/Platform-iOS%2016.0%2B-blue.svg" alt="Platform">
   <img src="https://img.shields.io/badge/Language-Swift%205-orange.svg" alt="Language">
   <img src="https://img.shields.io/badge/UI-SwiftUI-green.svg" alt="SwiftUI">
@@ -123,15 +124,17 @@
 
 ## 📦 IPA 安装方法
 
+> 📥 **最新版本**：[前往 Releases 页面下载 v1.0.1 产物](https://github.com/As-langs/PickupCode-iOS/releases/latest) （提供 `取件快码-1.0.1.ipa` 与 `PickupCode-1.0.1.ipa`）
+
 ### 1. TrollStore（巨魔商店，推荐）
-- 直接通过 AirDrop、文件或网页分享将 `取件快码-1.0.ipa` 传送到手机；
+- 直接通过 AirDrop、文件或网页分享将 `取件快码-1.0.1.ipa` 传送到手机；
 - 在分享菜单中选择 **「TrollStore」** 安装即可永久使用。
 
 > 💡 **解决抖音多开/修改版抢协议技巧**：  
 > 若手机上同时安装了第三方抖音且跳转时被第三方拦截：打开 TrollStore -> 点击第三方抖音 -> 点击 **「Uninstall URL Scheme」**（注销协议）。第三方抖音所有功能与插件不受任何影响，但取件快码能 100% 直达 App Store 官方抖音！
 
 ### 2. 证书自签名（LCSign / 轻松签 / 全能签 / Sideloadly）
-- 导入 `取件快码-1.0.ipa`；
+- 导入 `取件快码-1.0.1.ipa`；
 - 使用个人证书或企业证书签名后直接安装。
 
 ---

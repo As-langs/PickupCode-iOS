@@ -161,9 +161,9 @@ enum EntryKey: String, CaseIterable, Identifiable, Codable {
             ]
         case .xhsPending:
             return [
-                "xhsdiscover://rn/order/list",
                 "xhsdiscover://rn/lancer-order/order/list",
                 "xhsdiscover://rn/lancer-order/list",
+                "xhsdiscover://webview?link=https%3A%2F%2Fwww.xiaohongshu.com%2Forder%2Flist",
                 "xhsdiscover://home",
                 "xhsdiscover://"
             ]
@@ -194,7 +194,7 @@ enum EntryKey: String, CaseIterable, Identifiable, Codable {
         case .dewuPending:
             return "https://m.dewu.com/"
         case .xhsPending:
-            return "https://www.xiaohongshu.com/"
+            return "https://www.xiaohongshu.com/order/list"
         }
     }
 }

@@ -116,7 +116,7 @@
   ```
 - **小红书待取**：
   ```text
-  xhsdiscover://rn/order/list
+  xhsdiscover://rn/lancer-order/order/list
   ```
 </details>
 

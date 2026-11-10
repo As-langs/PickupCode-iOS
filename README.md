@@ -154,6 +154,7 @@ PickupCode-iOS/
 │       └── Images/               # 提取自原版的 384x384 高清平台图标
 ├── PickupCodeWidget/             # 原生三合一 WidgetKit 扩展源码
 ├── Shortcuts/                    # 苹果官方已签名的快捷指令文件
+│   ├── 取件快码_二合一.shortcut
 │   ├── 取件身份码.shortcut
 │   └── 快递待取.shortcut
 └── build_ipa.sh                  # 自动化编译打包 IPA 脚本
@@ -165,7 +166,7 @@ PickupCode-iOS/
 
 ```bash
 # 1. 克隆项目
-git clone https://github.com/your-username/PickupCode-iOS.git
+git clone https://github.com/As-langs/PickupCode-iOS.git
 cd PickupCode-iOS
 
 # 2. 一键编译并打包生成 IPA
@@ -177,8 +178,9 @@ chmod +x build_ipa.sh
 
 ## 👥 作者与致谢
 
-- **作者**：Hans
-- **致谢**：然后啊然后
+- **iOS 版本开发**：Hans
+- **特别致谢**：然后啊然后
+- **Android 原作**：[酷安 @原作者 (UID: 27888540)](https://www.coolapk.com/u/27888540)（感谢原作者优秀的取件快码设计与灵感启发）
 
 ---
 

@@ -25,6 +25,13 @@
 			<key>sourceTree</key>
 			<string>&lt;group&gt;</string>
 		</dict>
+		<key>177C6701D72EAAE9EB7C6CF8</key>
+		<dict>
+			<key>fileRef</key>
+			<string>B517D52640FB521082BCBC18</string>
+			<key>isa</key>
+			<string>PBXBuildFile</string>
+		</dict>
 		<key>17881BA1DE70F660B45AE763</key>
 		<dict>
 			<key>isa</key>
@@ -417,6 +424,7 @@
 				<string>AC91D9467F4906DC3A777173</string>
 				<string>33C298DFE52ADC9CBDA1ECD5</string>
 				<string>75927458DC171DEBB469042F</string>
+				<string>177C6701D72EAAE9EB7C6CF8</string>
 			</array>
 			<key>isa</key>
 			<string>PBXResourcesBuildPhase</string>
@@ -623,6 +631,7 @@
 				<string>E4C0D14B99DC7887394F4FDD</string>
 				<string>235259DF30C3EAA5EB0979F1</string>
 				<string>8549495A3483C9B3ED54CBBF</string>
+				<string>B517D52640FB521082BCBC18</string>
 			</array>
 			<key>isa</key>
 			<string>PBXGroup</string>
@@ -690,6 +699,17 @@
 			<string>B94E734011AB4D24C8134D09</string>
 			<key>isa</key>
 			<string>PBXBuildFile</string>
+		</dict>
+		<key>B517D52640FB521082BCBC18</key>
+		<dict>
+			<key>isa</key>
+			<string>PBXFileReference</string>
+			<key>lastKnownFileType</key>
+			<string>image.png</string>
+			<key>path</key>
+			<string>ic_xhs.png</string>
+			<key>sourceTree</key>
+			<string>&lt;group&gt;</string>
 		</dict>
 		<key>B734AF7658EF67D6530BE0BB</key>
 		<dict>

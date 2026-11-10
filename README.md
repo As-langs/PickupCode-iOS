@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-  <b>三个身份码 · 六个查件入口</b><br>
+  <b>三个身份码 · 七个查件入口</b><br>
   一站式出示各平台驿站取件身份码，极速直达主流电商订单物流界面。<br>
   原生纯 SwiftUI 重构，极速轻巧，纯净无广告，隐私安全。
 </p>
@@ -25,13 +25,14 @@
   - **淘宝身份码**（菜鸟驿站扫码出示）
   - **京东身份码**（订单内一键查看取件码）
   - **拼多多身份码**（多多驿站扫码出示）
-- 📦 **六大电商查件入口**：
-  - **淘宝待取**（查看待取包裹与校园驿站）
+- 📦 **七大电商查件入口**：
+  - **淘宝待取**（直达待收货与校园驿站）
   - **京东待取**（京东订单物流与取件码）
-  - **拼多多待取**（多多包裹列表）
+  - **拼多多待取**（多多待收货包裹列表）
   - **抖音待取**（抖音商城-我的订单待收货）
   - **快手待取**（快手小店订单列表）
   - **得物待取**（得物买家订单物流）
+  - **小红书待取** 🆕（小红书订单中心与物流）
 - 🎨 **雅致界面设计**：
   - **青简**（清新竹简 · 雅致绿意）
   - **雾青**（雾感毛玻璃 · 现代科技）
@@ -53,9 +54,9 @@
 
 | 快捷指令版本 | 菜单交互模式 | 涵盖平台与入口 | 下载链接 |
 | :--- | :--- | :--- | :--- |
-| ⭐️ **取件快码（二合一全能版）**<br>*(推荐)* | 智能二级菜单：<br>1. 🪪 驿站身份码<br>2. 📦 查询快递待取 | **全功能集合**：<br>淘宝、京东、拼多多身份码 +<br>淘宝、京东、多多、抖音、快手、得物待取 | [📥 点击下载 `取件快码_二合一.shortcut`](Shortcuts/取件快码_二合一.shortcut) |
+| ⭐️ **取件快码（二合一全能版）**<br>*(推荐)* | 智能二级菜单：<br>1. 🪪 驿站身份码<br>2. 📦 查询快递待取 | **全功能集合**：<br>淘宝、京东、拼多多身份码 +<br>淘宝、京东、多多、抖音、快手、得物、小红书待取 | [📥 点击下载 `取件快码_二合一.shortcut`](Shortcuts/取件快码_二合一.shortcut) |
 | **取件身份码（独立版）** | 一级菜单直接展示 3 项 | 淘宝、京东、拼多多 身份码 | [📥 点击下载 `取件身份码.shortcut`](Shortcuts/取件身份码.shortcut) |
-| **快递待取（独立版）** | 一级菜单直接展示 6 项 | 淘宝、京东、多多、抖音、快手、得物 待取 | [📥 点击下载 `快递待取.shortcut`](Shortcuts/快递待取.shortcut) |
+| **快递待取（独立版）** | 一级菜单直接展示 7 项 | 淘宝、京东、多多、抖音、快手、得物、小红书 待取 | [📥 点击下载 `快递待取.shortcut`](Shortcuts/快递待取.shortcut) |
 
 ### 快捷指令安装与添加到桌面
 
@@ -76,7 +77,7 @@
 #### 1. 身份码协议
 - **淘宝身份码**：
   ```text
-  taobao://m.taobao.com/tbopen/index.html?h5Url=https%3A%2F%2Fpages-fast.m.taobao.com%2Fwow%2Fz%2Funiapp%2F1011717%2Flast-mile-fe%2Fend-collect-platform%2Fidentity-code%3Fx-ssr%3Dtrue
+  taobao://m.taobao.com/tbopen/index.html?h5Url=https%3A%2F%2Fmarket.m.taobao.com%2Fapp%2Fcn-yz%2Fmulti-activity%2FauthCode.html
   ```
 - **京东身份码**：
   ```text
@@ -90,7 +91,7 @@
 #### 2. 查件待取协议
 - **淘宝待取**：
   ```text
-  taobao://m.taobao.com/tbopen/index.html?h5Url=https%3A%2F%2Fpages-fast.m.taobao.com%2Fwow%2Fz%2Funiapp%2F1100333%2Flast-mile-fe%2Fm-end-school-tab%2Fhome
+  taobao://m.taobao.com/tbopen/index.html?action=ali.open.nav&h5Url=https%3A%2F%2Fh5.m.taobao.com%2Fawp%2Fmtb%2Folist.htm%3FtabCode%3DwaitConfirm
   ```
 - **京东待取**：
   ```text
@@ -98,7 +99,7 @@
   ```
 - **拼多多待取**：
   ```text
-  pinduoduo://com.xunmeng.pinduoduo/mdkd/package
+  pinduoduo://com.xunmeng.pinduoduo/orders.html?status=wait_receive
   ```
 - **抖音待取**：
   ```text
@@ -111,6 +112,10 @@
 - **得物待取**：
   ```text
   dewuapp://m.dewu.com/router/order/buyer/orderList?tabId=0
+  ```
+- **小红书待取**：
+  ```text
+  xhsdiscover://rn/order/list
   ```
 </details>
 

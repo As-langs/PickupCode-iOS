@@ -16,6 +16,7 @@ enum EntryKey: String, CaseIterable, Identifiable, Codable {
     case douyinPending  = "douyin_pending"
     case kuaishouPending = "kuaishou_pending"
     case dewuPending    = "dewu_pending"
+    case xhsPending     = "xhs_pending"
     
     var id: String { rawValue }
     
@@ -39,6 +40,7 @@ enum EntryKey: String, CaseIterable, Identifiable, Codable {
         case .douyinPending:  return "抖音待取"
         case .kuaishouPending: return "快手待取"
         case .dewuPending:    return "得物待取"
+        case .xhsPending:     return "小红书待取"
         }
     }
     
@@ -50,7 +52,7 @@ enum EntryKey: String, CaseIterable, Identifiable, Codable {
             return "订单内查看"
         case .taobaoPending, .jdPending, .pddPending:
             return "查看待取包裹"
-        case .douyinPending, .kuaishouPending, .dewuPending:
+        case .douyinPending, .kuaishouPending, .dewuPending, .xhsPending:
             return "查看订单物流"
         }
     }
@@ -69,6 +71,8 @@ enum EntryKey: String, CaseIterable, Identifiable, Codable {
             return "ic_kuaishou"
         case .dewuPending:
             return "ic_dewu"
+        case .xhsPending:
+            return "ic_xhs"
         }
     }
     
@@ -85,13 +89,15 @@ enum EntryKey: String, CaseIterable, Identifiable, Codable {
         case .jdPending:
             return "已打开京东订单列表，点开订单查看物流"
         case .pddPending:
-            return "已打开多多驿站包裹列表"
+            return "已打开多多待收货包裹列表"
         case .douyinPending:
             return "已打开抖音订单列表，可看待收货与物流"
         case .kuaishouPending:
             return "已打开快手小店订单列表"
         case .dewuPending:
             return "已打开得物订单列表"
+        case .xhsPending:
+            return "已打开小红书订单列表"
         }
     }
     
@@ -99,10 +105,10 @@ enum EntryKey: String, CaseIterable, Identifiable, Codable {
         switch self {
         case .taobaoCode:
             return [
-                "taobao://m.taobao.com/tbopen/index.html?h5Url=https%3A%2F%2Fpages-fast.m.taobao.com%2Fwow%2Fz%2Funiapp%2F1011717%2Flast-mile-fe%2Fend-collect-platform%2Fidentity-code%3Fx-ssr%3Dtrue",
-                "tbopen://m.taobao.com/tbopen/index.html?h5Url=https%3A%2F%2Fpages-fast.m.taobao.com%2Fwow%2Fz%2Funiapp%2F1011717%2Flast-mile-fe%2Fend-collect-platform%2Fidentity-code%3Fx-ssr%3Dtrue",
                 "taobao://m.taobao.com/tbopen/index.html?h5Url=https%3A%2F%2Fmarket.m.taobao.com%2Fapp%2Fcn-yz%2Fmulti-activity%2FauthCode.html",
-                "tbopen://m.taobao.com/tbopen/index.html?h5Url=https%3A%2F%2Fmarket.m.taobao.com%2Fapp%2Fcn-yz%2Fmulti-activity%2FauthCode.html"
+                "tbopen://m.taobao.com/tbopen/index.html?h5Url=https%3A%2F%2Fmarket.m.taobao.com%2Fapp%2Fcn-yz%2Fmulti-activity%2FauthCode.html",
+                "taobao://m.taobao.com/tbopen/index.html?h5Url=https%3A%2F%2Fpages-fast.m.taobao.com%2Fwow%2Fz%2Funiapp%2F1011717%2Flast-mile-fe%2Fend-collect-platform%2Fidentity-code%3Fx-ssr%3Dtrue",
+                "tbopen://m.taobao.com/tbopen/index.html?h5Url=https%3A%2F%2Fpages-fast.m.taobao.com%2Fwow%2Fz%2Funiapp%2F1011717%2Flast-mile-fe%2Fend-collect-platform%2Fidentity-code%3Fx-ssr%3Dtrue"
             ]
         case .jdCode:
             return [
@@ -119,6 +125,8 @@ enum EntryKey: String, CaseIterable, Identifiable, Codable {
             ]
         case .taobaoPending:
             return [
+                "taobao://m.taobao.com/tbopen/index.html?action=ali.open.nav&h5Url=https%3A%2F%2Fh5.m.taobao.com%2Fawp%2Fmtb%2Folist.htm%3FtabCode%3DwaitConfirm",
+                "tbopen://m.taobao.com/tbopen/index.html?action=ali.open.nav&h5Url=https%3A%2F%2Fh5.m.taobao.com%2Fawp%2Fmtb%2Folist.htm%3FtabCode%3DwaitConfirm",
                 "taobao://m.taobao.com/tbopen/index.html?h5Url=https%3A%2F%2Fpages-fast.m.taobao.com%2Fwow%2Fz%2Funiapp%2F1100333%2Flast-mile-fe%2Fm-end-school-tab%2Fhome",
                 "tbopen://m.taobao.com/tbopen/index.html?h5Url=https%3A%2F%2Fpages-fast.m.taobao.com%2Fwow%2Fz%2Funiapp%2F1100333%2Flast-mile-fe%2Fm-end-school-tab%2Fhome"
             ]
@@ -130,6 +138,7 @@ enum EntryKey: String, CaseIterable, Identifiable, Codable {
             ]
         case .pddPending:
             return [
+                "pinduoduo://com.xunmeng.pinduoduo/orders.html?status=wait_receive",
                 "pinduoduo://com.xunmeng.pinduoduo/mdkd/package",
                 "pinduoduo://com.xunmeng.pinduoduo/mdkd/package?tab=ID_CODE&entry_source=11"
             ]
@@ -150,6 +159,14 @@ enum EntryKey: String, CaseIterable, Identifiable, Codable {
                 "dewuapp://m.dewu.com/router/order/buyer/orderList?tabId=0",
                 "dewuapp://"
             ]
+        case .xhsPending:
+            return [
+                "xhsdiscover://rn/order/list",
+                "xhsdiscover://rn/lancer-order/order/list",
+                "xhsdiscover://rn/lancer-order/list",
+                "xhsdiscover://home",
+                "xhsdiscover://"
+            ]
         }
     }
     
@@ -163,19 +180,21 @@ enum EntryKey: String, CaseIterable, Identifiable, Codable {
     var webURLString: String? {
         switch self {
         case .taobaoCode:
-            return "https://pages-fast.m.taobao.com/wow/z/uniapp/1011717/last-mile-fe/end-collect-platform/identity-code?x-ssr=true"
+            return "https://market.m.taobao.com/app/cn-yz/multi-activity/authCode.html"
         case .jdCode, .jdPending:
             return "https://order.jd.com/center/list.action"
         case .pddCode, .pddPending:
             return "https://m.pinduoduo.net/mdkd/package?entry_source=18&extra_params=from_wx_jump%3D1&p_channel=0"
         case .taobaoPending:
-            return "https://pages-fast.m.taobao.com/wow/z/uniapp/1100333/last-mile-fe/m-end-school-tab/home"
+            return "https://h5.m.taobao.com/awp/mtb/olist.htm?tabCode=waitConfirm"
         case .douyinPending:
             return "https://haohuo.jinritemai.com/views/order/list"
         case .kuaishouPending:
             return "https://app.kwaixiaodian.com/page/kwaishop-trade-order-list-app?layoutType=4&hyId=kwaishopOrder"
         case .dewuPending:
             return "https://m.dewu.com/"
+        case .xhsPending:
+            return "https://www.xiaohongshu.com/"
         }
     }
 }

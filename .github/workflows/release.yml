@@ -16,6 +16,13 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Clean up legacy assets
+        run: |
+          gh release delete-asset "${{ github.ref_name }}" "-1.0.ipa" --yes || true
+          gh release delete-asset "${{ github.ref_name }}" "PickupCode-1.0.ipa" --yes || true
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Publish Release to GitHub
         uses: softprops/action-gh-release@v2
         if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'

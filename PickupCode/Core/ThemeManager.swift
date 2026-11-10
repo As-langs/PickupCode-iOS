@@ -41,6 +41,30 @@ enum DarkModeSetting: Int, CaseIterable, Identifiable {
     }
 }
 
+enum GridColumnSetting: Int, CaseIterable, Identifiable {
+    case one   = 1
+    case two   = 2
+    case three = 3
+    
+    var id: Int { rawValue }
+    
+    var title: String {
+        switch self {
+        case .one:   return "一列"
+        case .two:   return "两列"
+        case .three: return "三列"
+        }
+    }
+    
+    var subtitle: String {
+        switch self {
+        case .one:   return "一列最清楚"
+        case .two:   return "两列兼顾"
+        case .three: return "三列最紧凑"
+        }
+    }
+}
+
 @MainActor
 class ThemeManager: ObservableObject {
     static let shared = ThemeManager()
@@ -59,12 +83,21 @@ class ThemeManager: ObservableObject {
         }
     }
     
+    @Published var gridColumns: GridColumnSetting {
+        didSet {
+            prefs.set(gridColumns.rawValue, forKey: "grid_columns")
+        }
+    }
+    
     init() {
         let styleVal = prefs.integer(forKey: "ui_style")
         self.uiStyle = UiStyle(rawValue: styleVal) ?? .paper
         
         let darkVal = prefs.integer(forKey: "dark_mode_setting")
         self.darkModeSetting = DarkModeSetting(rawValue: darkVal) ?? .followSystem
+        
+        let colVal = prefs.integer(forKey: "grid_columns")
+        self.gridColumns = GridColumnSetting(rawValue: colVal == 0 ? 1 : colVal) ?? .one
     }
     
     var colorScheme: ColorScheme? {

@@ -47,17 +47,21 @@ WIDGET_DIR="ipa_build/Payload/PickupCode.app/PlugIns/PickupCodeWidget.appex"
 mkdir -p "$WIDGET_DIR"
 cp "$PROJ_DIR/PickupCodeWidget/PickupCodeWidget" "$WIDGET_DIR/"
 cp "$PROJ_DIR/PickupCodeWidget/Info.plist" "$WIDGET_DIR/"
-cp PickupCode/Resources/Images/ic_taobao.png "$WIDGET_DIR/"
-cp PickupCode/Resources/Images/ic_jd.png "$WIDGET_DIR/"
-cp PickupCode/Resources/Images/ic_pinduoduo.png "$WIDGET_DIR/"
+cp PickupCode/Resources/Images/*.png "$WIDGET_DIR/"
 
 codesign -s - --force "$WIDGET_DIR" || true
 
 echo "=== 5. Zipping IPA ==="
 cd ipa_build
-zip -qry ../PickupCode-1.0.1.ipa Payload
+zip -qry ../PickupCode-2.0.0.ipa Payload
 cd ..
-cp PickupCode-1.0.1.ipa 取件快码-1.0.1.ipa
+cp PickupCode-2.0.0.ipa 取件快码-2.0.0.ipa
+
+mkdir -p release_assets
+cp PickupCode-2.0.0.ipa release_assets/
+cp 取件快码-2.0.0.ipa release_assets/
+cp PickupCode-2.0.0.ipa /Users/zouh/Downloads/ 2>/dev/null || true
+cp 取件快码-2.0.0.ipa /Users/zouh/Downloads/ 2>/dev/null || true
 
 echo "=== 6. Build Completed ==="
-ls -lh PickupCode-1.0.1.ipa 取件快码-1.0.1.ipa
+ls -lh PickupCode-2.0.0.ipa 取件快码-2.0.0.ipa release_assets/

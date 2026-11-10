@@ -17,6 +17,7 @@
 				<string>F7A8C0A647A92D7B91EBAFBE</string>
 				<string>F45C347027EFDE6D0A3EDE82</string>
 				<string>494EDC552EE9E0803C59F226</string>
+				<string>489186349CF86CCB24649250</string>
 			</array>
 			<key>isa</key>
 			<string>PBXGroup</string>
@@ -24,6 +25,13 @@
 			<string>Core</string>
 			<key>sourceTree</key>
 			<string>&lt;group&gt;</string>
+		</dict>
+		<key>1476B732C68D8CE49348B759</key>
+		<dict>
+			<key>fileRef</key>
+			<string>7682CE2DC514F6F9DE392495</string>
+			<key>isa</key>
+			<string>PBXBuildFile</string>
 		</dict>
 		<key>177C6701D72EAAE9EB7C6CF8</key>
 		<dict>
@@ -187,6 +195,17 @@
 			<key>isa</key>
 			<string>XCConfigurationList</string>
 		</dict>
+		<key>489186349CF86CCB24649250</key>
+		<dict>
+			<key>isa</key>
+			<string>PBXFileReference</string>
+			<key>lastKnownFileType</key>
+			<string>sourcecode.swift</string>
+			<key>path</key>
+			<string>PickupCodeManager.swift</string>
+			<key>sourceTree</key>
+			<string>&lt;group&gt;</string>
+		</dict>
 		<key>494EDC552EE9E0803C59F226</key>
 		<dict>
 			<key>isa</key>
@@ -195,6 +214,17 @@
 			<string>sourcecode.swift</string>
 			<key>path</key>
 			<string>JumpManager.swift</string>
+			<key>sourceTree</key>
+			<string>&lt;group&gt;</string>
+		</dict>
+		<key>4AAE6FEA9F3F591E3F2B3C86</key>
+		<dict>
+			<key>isa</key>
+			<string>PBXFileReference</string>
+			<key>lastKnownFileType</key>
+			<string>image.png</string>
+			<key>path</key>
+			<string>ic_cainiao.png</string>
 			<key>sourceTree</key>
 			<string>&lt;group&gt;</string>
 		</dict>
@@ -226,7 +256,7 @@
 					<string>@executable_path/Frameworks</string>
 				</array>
 				<key>MARKETING_VERSION</key>
-				<string>1.0.1</string>
+				<string>2.0.0</string>
 				<key>PRODUCT_BUNDLE_IDENTIFIER</key>
 				<string>com.takegai.fastcode</string>
 				<key>PRODUCT_NAME</key>
@@ -418,6 +448,7 @@
 				<string>EBEF15DCED15D05AB0985661</string>
 				<string>B3CD5559958126C15B7F6DBE</string>
 				<string>2BF0E4550299BD79F27F659D</string>
+				<string>86C41153C5B9D08904DA0782</string>
 				<string>83F8FD12C045714185FFC0E7</string>
 				<string>43A3BE5892299A3A52085C66</string>
 				<string>59A931B4C8430E9658AC88BA</string>
@@ -477,7 +508,7 @@
 					<string>@executable_path/Frameworks</string>
 				</array>
 				<key>MARKETING_VERSION</key>
-				<string>1.0.1</string>
+				<string>2.0.0</string>
 				<key>PRODUCT_BUNDLE_IDENTIFIER</key>
 				<string>com.takegai.fastcode</string>
 				<key>PRODUCT_NAME</key>
@@ -509,6 +540,17 @@
 			<string>sourcecode.swift</string>
 			<key>path</key>
 			<string>ContentView.swift</string>
+			<key>sourceTree</key>
+			<string>&lt;group&gt;</string>
+		</dict>
+		<key>7682CE2DC514F6F9DE392495</key>
+		<dict>
+			<key>isa</key>
+			<string>PBXFileReference</string>
+			<key>lastKnownFileType</key>
+			<string>sourcecode.swift</string>
+			<key>path</key>
+			<string>PickupCodeSectionView.swift</string>
 			<key>sourceTree</key>
 			<string>&lt;group&gt;</string>
 		</dict>
@@ -554,6 +596,13 @@
 			<string>ic_taobao.png</string>
 			<key>sourceTree</key>
 			<string>&lt;group&gt;</string>
+		</dict>
+		<key>86C41153C5B9D08904DA0782</key>
+		<dict>
+			<key>fileRef</key>
+			<string>4AAE6FEA9F3F591E3F2B3C86</string>
+			<key>isa</key>
+			<string>PBXBuildFile</string>
 		</dict>
 		<key>8E3AEDB2528B100E3662048F</key>
 		<dict>
@@ -604,6 +653,7 @@
 				<string>50F4A7F31A846ABF974B6E8E</string>
 				<string>B7DAAAF75D22090FC3B924B3</string>
 				<string>BD02D9E0A47466BEF9500E5F</string>
+				<string>7682CE2DC514F6F9DE392495</string>
 			</array>
 			<key>isa</key>
 			<string>PBXGroup</string>
@@ -625,6 +675,7 @@
 				<string>453D22F102A29665CF5454E7</string>
 				<string>B94E734011AB4D24C8134D09</string>
 				<string>7062167C6D7F723F93A259C1</string>
+				<string>4AAE6FEA9F3F591E3F2B3C86</string>
 				<string>B201082076B40BABF658707C</string>
 				<string>B34AD4603097E059AFA2058F</string>
 				<string>95410199F726942F9983B8CF</string>
@@ -870,16 +921,25 @@
 				<string>825DAA6CBBA7190D7668CBF6</string>
 				<string>55584BA84425871D1949509B</string>
 				<string>211D6D6DD582C721C63D7D02</string>
+				<string>E9031BE5DE621FEE42AA2F1C</string>
 				<string>C6A5AA1937C362EFE96D3E28</string>
 				<string>70CA8968EC1CCE04C74E7ADF</string>
 				<string>8139624898A349ADA4ED5613</string>
 				<string>5493A0E9AC4E0C6EF963D0DC</string>
 				<string>518881DAB0E9A36836079599</string>
+				<string>1476B732C68D8CE49348B759</string>
 			</array>
 			<key>isa</key>
 			<string>PBXSourcesBuildPhase</string>
 			<key>runOnlyForDeploymentPostprocessing</key>
 			<integer>0</integer>
+		</dict>
+		<key>E9031BE5DE621FEE42AA2F1C</key>
+		<dict>
+			<key>fileRef</key>
+			<string>489186349CF86CCB24649250</string>
+			<key>isa</key>
+			<string>PBXBuildFile</string>
 		</dict>
 		<key>EBEF15DCED15D05AB0985661</key>
 		<dict>

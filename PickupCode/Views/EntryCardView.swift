@@ -197,3 +197,159 @@ struct ScaleButtonStyle: ButtonStyle {
             .animation(.easeInOut(duration: 0.15), value: configuration.isPressed)
     }
 }
+
+// MARK: - Grid Entry Card (for 2 or 3 columns)
+
+struct GridEntryCardView: View {
+    let key: EntryKey
+    let columns: Int // 2 or 3
+    let isEditing: Bool
+    let onAction: () -> Void
+    
+    @EnvironmentObject var themeManager: ThemeManager
+    @Environment(\.colorScheme) var systemColorScheme
+    
+    private var isDarkMode: Bool {
+        if let mode = themeManager.colorScheme {
+            return mode == .dark
+        }
+        return systemColorScheme == .dark
+    }
+    
+    var body: some View {
+        Button(action: {
+            if !isEditing {
+                onAction()
+            }
+        }) {
+            VStack(spacing: columns == 3 ? 6 : 8) {
+                // Icon plate
+                ZStack {
+                    RoundedRectangle(cornerRadius: columns == 3 ? 12 : 14, style: .continuous)
+                        .fill(iconPlateBackground)
+                        .frame(width: columns == 3 ? 46 : 52, height: columns == 3 ? 46 : 52)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: columns == 3 ? 12 : 14, style: .continuous)
+                                .stroke(iconPlateBorder, lineWidth: 1)
+                        )
+                    
+                    PlatformIconView(
+                        name: key.iconName,
+                        size: columns == 3 ? 32 : 36
+                    )
+                }
+                
+                // Title underneath icon (centered, no truncation)
+                Text(key.title)
+                    .font(.system(size: columns == 3 ? 12 : 13, weight: .semibold, design: .rounded))
+                    .foregroundColor(primaryTextColor)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.85)
+                    .multilineTextAlignment(.center)
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, columns == 3 ? 10 : 12)
+            .padding(.horizontal, 4)
+            .background(cardBackground)
+            .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                    .stroke(cardBorderColor, lineWidth: 1)
+            )
+            .shadow(color: cardShadowColor, radius: 6, x: 0, y: 2)
+        }
+        .buttonStyle(ScaleButtonStyle())
+        .contextMenu {
+            if let webStr = key.webURLString, let url = URL(string: webStr) {
+                Button {
+                    UIApplication.shared.open(url)
+                } label: {
+                    Label("在 Safari 中打开网页版", systemImage: "safari")
+                }
+            }
+        }
+    }
+    
+    private var primaryTextColor: Color {
+        isDarkMode ? Color(hex: "F3F4F6") : Color(hex: "1F2937")
+    }
+    
+    @ViewBuilder
+    private var cardBackground: some View {
+        switch themeManager.uiStyle {
+        case .paper:
+            if isDarkMode {
+                Color(hex: "1E242B")
+            } else {
+                Color.white
+            }
+        case .glass:
+            if isDarkMode {
+                Color(hex: "1F2833").opacity(0.7)
+                    .background(.ultraThinMaterial)
+            } else {
+                Color.white.opacity(0.7)
+                    .background(.ultraThinMaterial)
+            }
+        case .flat:
+            if isDarkMode {
+                Color(hex: "1A1E24")
+            } else {
+                Color.white
+            }
+        }
+    }
+    
+    private var cardBorderColor: Color {
+        switch themeManager.uiStyle {
+        case .paper:
+            return isDarkMode ? Color(hex: "2E3844") : Color(hex: "E6EFEA")
+        case .glass:
+            return isDarkMode ? Color.white.opacity(0.12) : Color.white.opacity(0.55)
+        case .flat:
+            return isDarkMode ? Color(hex: "2A303A") : Color(hex: "E5E7EB")
+        }
+    }
+    
+    private var cardShadowColor: Color {
+        if isDarkMode {
+            return Color.clear
+        }
+        switch themeManager.uiStyle {
+        case .paper:
+            return Color(hex: "00A870").opacity(0.04)
+        case .glass:
+            return Color(hex: "00B4D8").opacity(0.08)
+        case .flat:
+            return Color.black.opacity(0.03)
+        }
+    }
+    
+    private var iconPlateBackground: Color {
+        if isDarkMode {
+            return Color(hex: "27303B")
+        }
+        switch themeManager.uiStyle {
+        case .paper:
+            return Color(hex: "F4FAF6")
+        case .glass:
+            return Color(hex: "EBF6FA").opacity(0.85)
+        case .flat:
+            return Color(hex: "F3F4F6")
+        }
+    }
+    
+    private var iconPlateBorder: Color {
+        if isDarkMode {
+            return Color(hex: "34414F")
+        }
+        switch themeManager.uiStyle {
+        case .paper:
+            return Color(hex: "D8EBE0")
+        case .glass:
+            return Color(hex: "CFE7F2")
+        case .flat:
+            return Color(hex: "E5E7EB")
+        }
+    }
+}

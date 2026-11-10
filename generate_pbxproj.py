@@ -11,11 +11,13 @@ swift_files = [
     ('Models.swift', 'Core/Models.swift', 'sourcecode.swift'),
     ('ThemeManager.swift', 'Core/ThemeManager.swift', 'sourcecode.swift'),
     ('JumpManager.swift', 'Core/JumpManager.swift', 'sourcecode.swift'),
+    ('PickupCodeManager.swift', 'Core/PickupCodeManager.swift', 'sourcecode.swift'),
     ('ContentView.swift', 'Views/ContentView.swift', 'sourcecode.swift'),
     ('EntryCardView.swift', 'Views/EntryCardView.swift', 'sourcecode.swift'),
     ('SettingsView.swift', 'Views/SettingsView.swift', 'sourcecode.swift'),
     ('ToastView.swift', 'Views/ToastView.swift', 'sourcecode.swift'),
     ('PlatformIconView.swift', 'Views/PlatformIconView.swift', 'sourcecode.swift'),
+    ('PickupCodeSectionView.swift', 'Views/PickupCodeSectionView.swift', 'sourcecode.swift'),
 ]
 
 png_files = sorted(glob.glob(f'{proj_dir}/PickupCode/Resources/Images/*.png'))
@@ -117,6 +119,7 @@ objects[core_group_id] = {
         swift_file_refs['Models.swift'],
         swift_file_refs['ThemeManager.swift'],
         swift_file_refs['JumpManager.swift'],
+        swift_file_refs['PickupCodeManager.swift'],
     ],
     'path': 'Core',
     'sourceTree': '<group>'
@@ -131,6 +134,7 @@ objects[views_group_id] = {
         swift_file_refs['SettingsView.swift'],
         swift_file_refs['ToastView.swift'],
         swift_file_refs['PlatformIconView.swift'],
+        swift_file_refs['PickupCodeSectionView.swift'],
     ],
     'path': 'Views',
     'sourceTree': '<group>'
@@ -233,7 +237,7 @@ objects[target_debug_cfg_id] = {
         'INFOPLIST_FILE': 'PickupCode/Resources/Info.plist',
         'IPHONEOS_DEPLOYMENT_TARGET': '16.0',
         'LD_RUNPATH_SEARCH_PATHS': ['$(inherited)', '@executable_path/Frameworks'],
-        'MARKETING_VERSION': '1.0.1',
+        'MARKETING_VERSION': '2.0.0',
         'PRODUCT_BUNDLE_IDENTIFIER': 'com.takegai.fastcode',
         'PRODUCT_NAME': '$(TARGET_NAME)',
         'SWIFT_EMIT_LOC_STRINGS': 'YES',
@@ -257,7 +261,7 @@ objects[target_release_cfg_id] = {
         'INFOPLIST_FILE': 'PickupCode/Resources/Info.plist',
         'IPHONEOS_DEPLOYMENT_TARGET': '16.0',
         'LD_RUNPATH_SEARCH_PATHS': ['$(inherited)', '@executable_path/Frameworks'],
-        'MARKETING_VERSION': '1.0.1',
+        'MARKETING_VERSION': '2.0.0',
         'PRODUCT_BUNDLE_IDENTIFIER': 'com.takegai.fastcode',
         'PRODUCT_NAME': '$(TARGET_NAME)',
         'SWIFT_EMIT_LOC_STRINGS': 'YES',

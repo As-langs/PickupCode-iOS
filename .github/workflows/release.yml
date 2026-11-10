@@ -17,9 +17,10 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Clean up legacy assets
+        continue-on-error: true
         run: |
-          gh release delete-asset "${{ github.ref_name }}" "-1.0.ipa" --yes || true
-          gh release delete-asset "${{ github.ref_name }}" "PickupCode-1.0.ipa" --yes || true
+          gh release delete-asset "${{ github.ref_name }}" "-1.0.ipa" --yes 2>/dev/null || true
+          gh release delete-asset "${{ github.ref_name }}" "PickupCode-1.0.ipa" --yes 2>/dev/null || true
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -32,10 +33,7 @@ jobs:
           draft: false
           prerelease: false
           files: |
-            release_assets/PickupCode-1.0.1.ipa
-            release_assets/取件快码-1.0.1.ipa
-            release_assets/PickupCode_AllInOne_取件快码.shortcut
-            release_assets/PickupCode_ID_取件身份码.shortcut
-            release_assets/PickupCode_Packages_快递待取.shortcut
+            release_assets/*.ipa
+            release_assets/*.shortcut
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

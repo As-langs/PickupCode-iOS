@@ -32,6 +32,15 @@ struct WidgetItem: Identifiable {
 
 let widgetItems: [WidgetItem] = [
     WidgetItem(
+        id: "cainiao_code",
+        title: "菜鸟身份码",
+        shortName: "菜鸟",
+        subtitle: "扫码出示",
+        iconName: "ic_cainiao",
+        scheme: "pickupcode://jump?entry=cainiao_code",
+        themeColor: Color(red: 0.05, green: 0.52, blue: 1.0) // 菜鸟蓝
+    ),
+    WidgetItem(
         id: "taobao_code",
         title: "淘宝身份码",
         shortName: "淘宝",

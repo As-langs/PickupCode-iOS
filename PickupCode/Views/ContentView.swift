@@ -2,28 +2,42 @@ import SwiftUI
 
 struct ContentView: View {
     @StateObject private var jumpManager = JumpManager.shared
+    @StateObject private var pickupManager = PickupCodeManager.shared
     @EnvironmentObject var themeManager: ThemeManager
     @Environment(\.colorScheme) var systemColorScheme
+    @Environment(\.scenePhase) private var scenePhase
     
     @State private var showingSettings = false
     @State private var isEditingOrder = false
-    @Environment(\.scenePhase) private var scenePhase
     
-    @State private var codeEntries: [EntryKey] = [.taobaoCode, .jdCode, .pddCode]
-    @State private var queryEntries: [EntryKey] = [
-        .taobaoPending, .jdPending, .pddPending,
-        .douyinPending, .kuaishouPending, .dewuPending, .xhsPending
+    @State private var entries: [EntryKey] = [
+        .cainiaoCode,
+        .taobaoCode,
+        .taobaoCainiaoPending,
+        .pddCode,
+        .pddPickup,
+        .jdCode,
+        .taobaoPending,
+        .pddPending,
+        .jdPending,
+        .douyinPending,
+        .kuaishouPending,
+        .dewuPending,
+        .xhsPending
     ]
     
     private let prefs = UserDefaults.standard
-    private let keyOrderCode = "order_code"
-    private let keyOrderQuery = "order_query"
+    private let keyOrderEntries = "order_entries_v2"
     
     private var isDarkMode: Bool {
         if let mode = themeManager.colorScheme {
             return mode == .dark
         }
         return systemColorScheme == .dark
+    }
+    
+    private var activeToastMessage: String? {
+        jumpManager.toastMessage ?? pickupManager.toastMessage
     }
     
     var body: some View {
@@ -38,47 +52,13 @@ struct ContentView: View {
                     headerView
                         .padding(.top, 12)
                     
-                    // Section 1: 身份码
-                    sectionContainer(
-                        title: "身份码",
-                        badge: "驿站扫码出示",
-                        accentColor: themeAccentColor
-                    ) {
-                        if isEditingOrder {
-                            ForEach(codeEntries) { entry in
-                                EntryCardView(key: entry, isEditing: true) { }
-                            }
-                            .onMove(perform: moveCodeEntry)
-                        } else {
-                            ForEach(codeEntries) { entry in
-                                EntryCardView(key: entry, isEditing: false) {
-                                    jumpManager.jump(to: entry)
-                                }
-                            }
-                        }
-                    }
+                    // Section 1: 取件码模块 (智能提取与本地记录)
+                    PickupCodeSectionView()
                     
-                    // Section 2: 查询快递
-                    sectionContainer(
-                        title: "查询快递",
-                        badge: "订单内查看",
-                        accentColor: themeAccentColor
-                    ) {
-                        if isEditingOrder {
-                            ForEach(queryEntries) { entry in
-                                EntryCardView(key: entry, isEditing: true) { }
-                            }
-                            .onMove(perform: moveQueryEntry)
-                        } else {
-                            ForEach(queryEntries) { entry in
-                                EntryCardView(key: entry, isEditing: false) {
-                                    jumpManager.jump(to: entry)
-                                }
-                            }
-                        }
-                    }
+                    // Section 2: 快捷入口 (合并网格：支持1列、2列、3列)
+                    entriesSection
                     
-                    // Drag Hint
+                    // Drag / Edit Hint
                     HStack(spacing: 6) {
                         Image(systemName: isEditingOrder ? "checkmark.circle" : "arrow.up.arrow.down")
                             .font(.system(size: 12))
@@ -94,13 +74,14 @@ struct ContentView: View {
             .environment(\.editMode, isEditingOrder ? .constant(.active) : .constant(.inactive))
             
             // Toast Overlay
-            if let toast = jumpManager.toastMessage {
+            if let toast = activeToastMessage {
                 VStack {
                     ToastView(message: toast)
                         .padding(.top, 10)
                     Spacer()
                 }
                 .zIndex(999)
+                .transition(.move(edge: .top).combined(with: .opacity))
             }
         }
         .onAppear {
@@ -128,14 +109,33 @@ struct ContentView: View {
                     .font(.system(size: 28, weight: .bold, design: .rounded))
                     .foregroundColor(primaryTextColor)
                 
-                Text("三个身份码 · 七个查件入口")
+                Text("四个身份码 · 九个查件入口")
                     .font(.system(size: 13, weight: .medium))
                     .foregroundColor(secondaryTextColor)
             }
             
             Spacer()
             
-            HStack(spacing: 12) {
+            HStack(spacing: 10) {
+                // Quick Grid Column Toggle Button
+                Button(action: {
+                    withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
+                        let nextVal = (themeManager.gridColumns.rawValue % 3) + 1
+                        themeManager.gridColumns = GridColumnSetting(rawValue: nextVal) ?? .one
+                    }
+                }) {
+                    Image(systemName: gridIconName)
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundColor(primaryTextColor)
+                        .frame(width: 38, height: 38)
+                        .background(headerButtonBackground)
+                        .clipShape(Circle())
+                        .overlay(
+                            Circle()
+                                .stroke(headerButtonBorder, lineWidth: 1)
+                        )
+                }
+                
                 // Edit/Reorder toggle
                 Button(action: {
                     withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
@@ -143,7 +143,7 @@ struct ContentView: View {
                     }
                 }) {
                     Image(systemName: isEditingOrder ? "checkmark" : "arrow.up.arrow.down")
-                        .font(.system(size: 15, weight: .semibold))
+                        .font(.system(size: 14, weight: .semibold))
                         .foregroundColor(isEditingOrder ? .white : primaryTextColor)
                         .frame(width: 38, height: 38)
                         .background(isEditingOrder ? Color.blue : headerButtonBackground)
@@ -157,7 +157,7 @@ struct ContentView: View {
                 // Settings button
                 Button(action: { showingSettings = true }) {
                     Image(systemName: "gearshape.fill")
-                        .font(.system(size: 16, weight: .medium))
+                        .font(.system(size: 15, weight: .medium))
                         .foregroundColor(primaryTextColor)
                         .frame(width: 38, height: 38)
                         .background(headerButtonBackground)
@@ -171,98 +171,145 @@ struct ContentView: View {
         }
     }
     
-    // MARK: - Section Container
+    private var gridIconName: String {
+        switch themeManager.gridColumns {
+        case .one: return "rectangle.grid.1x2"
+        case .two: return "square.grid.2x2"
+        case .three: return "square.grid.3x3"
+        }
+    }
     
-    @ViewBuilder
-    private func sectionContainer<Content: View>(
-        title: String,
-        badge: String,
-        accentColor: Color,
-        @ViewBuilder content: () -> Content
-    ) -> some View {
-        VStack(alignment: .leading, spacing: 12) {
+    // MARK: - Entries Section (1, 2, or 3 columns)
+    
+    private var entriesSection: some View {
+        VStack(alignment: .leading, spacing: 14) {
             HStack(spacing: 8) {
                 RoundedRectangle(cornerRadius: 3)
-                    .fill(accentColor)
+                    .fill(themeAccentColor)
                     .frame(width: 4, height: 16)
                 
-                Text(title)
+                Text("快捷入口")
                     .font(.system(size: 17, weight: .bold, design: .rounded))
                     .foregroundColor(primaryTextColor)
                 
-                Text(badge)
+                Text("\(entries.count) 个平台直达")
                     .font(.system(size: 11, weight: .semibold))
-                    .foregroundColor(accentColor)
+                    .foregroundColor(themeAccentColor)
                     .padding(.horizontal, 8)
                     .padding(.vertical, 3)
                     .background(
                         Capsule()
-                            .fill(accentColor.opacity(0.12))
+                            .fill(themeAccentColor.opacity(0.12))
                     )
                 
                 Spacer()
+                
+                Text(themeManager.gridColumns.title)
+                    .font(.system(size: 12, weight: .regular))
+                    .foregroundColor(secondaryTextColor)
             }
             .padding(.leading, 2)
             
-            VStack(spacing: 10) {
-                content()
+            // Grid or List Content
+            if themeManager.gridColumns == .one {
+                // One Column: List style
+                VStack(spacing: 10) {
+                    if isEditingOrder {
+                        ForEach(entries) { entry in
+                            EntryCardView(key: entry, isEditing: true) { }
+                        }
+                        .onMove(perform: moveEntry)
+                    } else {
+                        ForEach(entries) { entry in
+                            EntryCardView(key: entry, isEditing: false) {
+                                jumpManager.jump(to: entry)
+                            }
+                        }
+                    }
+                }
+            } else {
+                // Two or Three Columns: Grid style
+                let cols = Array(repeating: GridItem(.flexible(), spacing: 10), count: themeManager.gridColumns.rawValue)
+                LazyVGrid(columns: cols, spacing: 10) {
+                    ForEach(entries) { entry in
+                        GridEntryCardView(
+                            key: entry,
+                            columns: themeManager.gridColumns.rawValue,
+                            isEditing: isEditingOrder
+                        ) {
+                            jumpManager.jump(to: entry)
+                        }
+                    }
+                }
             }
         }
     }
     
     // MARK: - Reordering Logic
     
-    private func moveCodeEntry(from source: IndexSet, to destination: Int) {
-        codeEntries.move(fromOffsets: source, toOffset: destination)
-        saveOrder()
-    }
-    
-    private func moveQueryEntry(from source: IndexSet, to destination: Int) {
-        queryEntries.move(fromOffsets: source, toOffset: destination)
+    private func moveEntry(from source: IndexSet, to destination: Int) {
+        entries.move(fromOffsets: source, toOffset: destination)
         saveOrder()
     }
     
     private func loadOrder() {
-        let defaultCode: [EntryKey] = [.taobaoCode, .jdCode, .pddCode]
-        let defaultQuery: [EntryKey] = [
-            .taobaoPending, .jdPending, .pddPending,
-            .douyinPending, .kuaishouPending, .dewuPending, .xhsPending
+        let defaultEntries: [EntryKey] = [
+            .cainiaoCode,
+            .taobaoCode,
+            .taobaoCainiaoPending,
+            .pddCode,
+            .pddPickup,
+            .jdCode,
+            .taobaoPending,
+            .pddPending,
+            .jdPending,
+            .douyinPending,
+            .kuaishouPending,
+            .dewuPending,
+            .xhsPending
         ]
         
-        if let savedCode = prefs.string(forKey: keyOrderCode) {
-            let keys = savedCode.split(separator: ",").map { String($0).trimmingCharacters(in: .whitespaces) }
+        if let saved = prefs.string(forKey: keyOrderEntries) {
+            let keys = saved.split(separator: ",").map { String($0).trimmingCharacters(in: .whitespaces) }
             let loaded = keys.compactMap { EntryKey(rawValue: $0) }
-            self.codeEntries = loaded.isEmpty ? defaultCode : loaded
-        } else {
-            self.codeEntries = defaultCode
-        }
-        
-        if let savedQuery = prefs.string(forKey: keyOrderQuery) {
-            let keys = savedQuery.split(separator: ",").map { String($0).trimmingCharacters(in: .whitespaces) }
-            let loaded = keys.compactMap { EntryKey(rawValue: $0) }
-            var result = loaded.filter { defaultQuery.contains($0) }
+            var result = loaded.filter { defaultEntries.contains($0) }
             var hasNew = false
-            for item in defaultQuery {
+            for item in defaultEntries {
                 if !result.contains(item) {
                     result.append(item)
                     hasNew = true
                 }
             }
-            self.queryEntries = result.isEmpty ? defaultQuery : result
+            self.entries = result.isEmpty ? defaultEntries : result
             if hasNew {
                 saveOrder()
             }
         } else {
-            self.queryEntries = defaultQuery
+            // Check legacy order_code and order_query for seamless upgrade
+            var legacyList: [EntryKey] = []
+            if let savedCode = prefs.string(forKey: "order_code") {
+                let keys = savedCode.split(separator: ",").map { String($0).trimmingCharacters(in: .whitespaces) }
+                legacyList.append(contentsOf: keys.compactMap { EntryKey(rawValue: $0) })
+            }
+            if let savedQuery = prefs.string(forKey: "order_query") {
+                let keys = savedQuery.split(separator: ",").map { String($0).trimmingCharacters(in: .whitespaces) }
+                legacyList.append(contentsOf: keys.compactMap { EntryKey(rawValue: $0) })
+            }
+            
+            var result = legacyList.filter { defaultEntries.contains($0) }
+            for item in defaultEntries {
+                if !result.contains(item) {
+                    result.append(item)
+                }
+            }
+            self.entries = result.isEmpty ? defaultEntries : result
             saveOrder()
         }
     }
     
     private func saveOrder() {
-        let codeStr = codeEntries.map { $0.rawValue }.joined(separator: ",")
-        let queryStr = queryEntries.map { $0.rawValue }.joined(separator: ",")
-        prefs.set(codeStr, forKey: keyOrderCode)
-        prefs.set(queryStr, forKey: keyOrderQuery)
+        let str = entries.map { $0.rawValue }.joined(separator: ",")
+        prefs.set(str, forKey: keyOrderEntries)
     }
     
     // MARK: - Theme Helpers

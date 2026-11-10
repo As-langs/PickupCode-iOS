@@ -17,13 +17,14 @@
 	<key>CFBundlePackageType</key>
 	<string>$(PRODUCT_BUNDLE_PACKAGE_TYPE)</string>
 	<key>CFBundleShortVersionString</key>
-	<string>1.0.1</string>
+	<string>2.0.0</string>
 	<key>CFBundleVersion</key>
 	<string>1</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>LSApplicationQueriesSchemes</key>
 	<array>
+		<string>cainiao</string>
 		<string>taobao</string>
 		<string>tbopen</string>
 		<string>openapp.jdmobile</string>
@@ -48,6 +49,59 @@
 			<array>
 				<string>pickupcode</string>
 			</array>
+		</dict>
+	</array>
+	<key>UIApplicationShortcutItems</key>
+	<array>
+		<dict>
+			<key>UIApplicationShortcutItemType</key>
+			<string>cainiao_code</string>
+			<key>UIApplicationShortcutItemTitle</key>
+			<string>菜鸟身份码</string>
+			<key>UIApplicationShortcutItemSubtitle</key>
+			<string>驿站扫码出示</string>
+			<key>UIApplicationShortcutItemIconType</key>
+			<string>UIApplicationShortcutIconTypeCaptureCode</string>
+		</dict>
+		<dict>
+			<key>UIApplicationShortcutItemType</key>
+			<string>taobao_code</string>
+			<key>UIApplicationShortcutItemTitle</key>
+			<string>淘宝身份码</string>
+			<key>UIApplicationShortcutItemSubtitle</key>
+			<string>驿站扫码出示</string>
+			<key>UIApplicationShortcutItemIconType</key>
+			<string>UIApplicationShortcutIconTypeCaptureCode</string>
+		</dict>
+		<dict>
+			<key>UIApplicationShortcutItemType</key>
+			<string>pdd_code</string>
+			<key>UIApplicationShortcutItemTitle</key>
+			<string>拼多多身份码</string>
+			<key>UIApplicationShortcutItemSubtitle</key>
+			<string>驿站扫码出示</string>
+			<key>UIApplicationShortcutItemIconType</key>
+			<string>UIApplicationShortcutIconTypeCaptureCode</string>
+		</dict>
+		<dict>
+			<key>UIApplicationShortcutItemType</key>
+			<string>taobao_pending</string>
+			<key>UIApplicationShortcutItemTitle</key>
+			<string>淘宝待收货</string>
+			<key>UIApplicationShortcutItemSubtitle</key>
+			<string>查看待取包裹</string>
+			<key>UIApplicationShortcutItemIconType</key>
+			<string>UIApplicationShortcutIconTypeSearch</string>
+		</dict>
+		<dict>
+			<key>UIApplicationShortcutItemType</key>
+			<string>paste_pickup_code</string>
+			<key>UIApplicationShortcutItemTitle</key>
+			<string>粘贴识别取件码</string>
+			<key>UIApplicationShortcutItemSubtitle</key>
+			<string>智能解析短信</string>
+			<key>UIApplicationShortcutItemIconType</key>
+			<string>UIApplicationShortcutIconTypeCompose</string>
 		</dict>
 	</array>
 	<key>CFBundleIcons</key>

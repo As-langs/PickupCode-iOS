@@ -16,6 +16,17 @@ struct SettingsView: View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: 24) {
+                    // MARK: - Grid Columns Section
+                    settingsSection(title: "每行个数", subtitle: "一列最清楚，三列最紧凑") {
+                        Picker("每行个数", selection: $themeManager.gridColumns) {
+                            ForEach(GridColumnSetting.allCases) { setting in
+                                Text(setting.title).tag(setting)
+                            }
+                        }
+                        .pickerStyle(.segmented)
+                        .padding(.vertical, 4)
+                    }
+                    
                     // MARK: - Dark Mode Section
                     settingsSection(title: "深色模式", subtitle: "跟随你的选择，不跟随系统") {
                         Picker("深色模式", selection: $themeManager.darkModeSetting) {
@@ -49,7 +60,7 @@ struct SettingsView: View {
                         }) {
                             HStack(spacing: 8) {
                                 Image(systemName: "arrow.counterclockwise")
-                                Text("重置默认排序（显示全部 7 个查件入口）")
+                                Text("重置默认排序（显示全部 13 个入口）")
                                 Spacer()
                             }
                             .foregroundColor(Color(hex: "00A870"))
@@ -60,7 +71,7 @@ struct SettingsView: View {
                     
                     // MARK: - About & Credits Section
                     VStack(spacing: 8) {
-                        Text("取件快码 v1.0.1 for iOS")
+                        Text("取件快码 v2.0.0 for iOS")
                             .font(.system(size: 14, weight: .semibold))
                             .foregroundColor(.secondary)
                         

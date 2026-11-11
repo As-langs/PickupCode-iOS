@@ -144,7 +144,6 @@ struct SettingsView: View {
                             // Authors & Credits
                             VStack(spacing: 10) {
                                 aboutRow(title: "iOS 版本开发", value: "Hans")
-                                aboutRow(title: "特别致谢", value: "然后啊然后")
                                 
                                 Button {
                                     if let url = URL(string: "https://www.coolapk.com/u/27888540") {
@@ -152,11 +151,11 @@ struct SettingsView: View {
                                     }
                                 } label: {
                                     HStack {
-                                        Text("Android 原作")
+                                        Text("致谢 Android 原作")
                                             .font(.system(size: 13))
                                             .foregroundColor(secondaryTextColor)
                                         Spacer()
-                                        Text("酷安 @原作者 (UID: 27888540)")
+                                        Text("酷安 @然后啊然后")
                                             .font(.system(size: 13, weight: .medium))
                                             .foregroundColor(Color.blue)
                                         Image(systemName: "arrow.up.right")

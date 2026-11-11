@@ -21,6 +21,10 @@ struct SettingsView: View {
         }
     }
     
+    private var secondaryTextColor: Color {
+        isDarkMode ? Color(hex: "9CA3AF") : Color(hex: "6B7280")
+    }
+    
     var body: some View {
         NavigationStack {
             ScrollView {
@@ -94,6 +98,105 @@ struct SettingsView: View {
                                 .font(.system(size: 14, weight: .medium))
                                 .padding(.vertical, 4)
                             }
+                        }
+                    }
+                    
+                    // MARK: - About & Authors Section
+                    settingsSection(title: "关于取件快码", subtitle: "版本信息、作者与开源主页") {
+                        VStack(spacing: 14) {
+                            // App Info Header
+                            HStack(spacing: 14) {
+                                ZStack {
+                                    RoundedRectangle(cornerRadius: 12, style: .continuous)
+                                        .fill(accentColor.opacity(0.12))
+                                        .frame(width: 44, height: 44)
+                                    
+                                    Image(systemName: "shippingbox.fill")
+                                        .font(.system(size: 22))
+                                        .foregroundColor(accentColor)
+                                }
+                                
+                                VStack(alignment: .leading, spacing: 3) {
+                                    Text("取件快码")
+                                        .font(.system(size: 16, weight: .bold))
+                                        .foregroundColor(isDarkMode ? .white : Color(hex: "1F2937"))
+                                    
+                                    Text("版本 2.0.0 (Build 2026.11.11)")
+                                        .font(.system(size: 12))
+                                        .foregroundColor(secondaryTextColor)
+                                }
+                                
+                                Spacer()
+                                
+                                Text("v2.0.0")
+                                    .font(.system(size: 12, weight: .bold, design: .rounded))
+                                    .foregroundColor(accentColor)
+                                    .padding(.horizontal, 8)
+                                    .padding(.vertical, 3)
+                                    .background(
+                                        Capsule()
+                                            .fill(accentColor.opacity(0.12))
+                                    )
+                            }
+                            
+                            Divider()
+                            
+                            // Authors & Credits
+                            VStack(spacing: 10) {
+                                aboutRow(title: "iOS 版本开发", value: "Hans")
+                                aboutRow(title: "特别致谢", value: "然后啊然后")
+                                
+                                Button {
+                                    if let url = URL(string: "https://www.coolapk.com/u/27888540") {
+                                        UIApplication.shared.open(url)
+                                    }
+                                } label: {
+                                    HStack {
+                                        Text("Android 原作")
+                                            .font(.system(size: 13))
+                                            .foregroundColor(secondaryTextColor)
+                                        Spacer()
+                                        Text("酷安 @原作者 (UID: 27888540)")
+                                            .font(.system(size: 13, weight: .medium))
+                                            .foregroundColor(Color.blue)
+                                        Image(systemName: "arrow.up.right")
+                                            .font(.system(size: 10))
+                                            .foregroundColor(Color.blue.opacity(0.8))
+                                    }
+                                }
+                            }
+                            
+                            Divider()
+                            
+                            // GitHub Project Homepage Link
+                            Button {
+                                if let url = URL(string: "https://github.com/As-langs/PickupCode-iOS") {
+                                    UIApplication.shared.open(url)
+                                }
+                            } label: {
+                                HStack(spacing: 8) {
+                                    Image(systemName: "link")
+                                        .font(.system(size: 13, weight: .semibold))
+                                    Text("GitHub 项目主页")
+                                        .font(.system(size: 13, weight: .semibold))
+                                    Spacer()
+                                    Text("As-langs/PickupCode-iOS")
+                                        .font(.system(size: 12))
+                                        .foregroundColor(.secondary)
+                                    Image(systemName: "chevron.right")
+                                        .font(.system(size: 11, weight: .semibold))
+                                        .foregroundColor(.secondary)
+                                }
+                                .foregroundColor(accentColor)
+                                .padding(.vertical, 2)
+                            }
+                            
+                            // Slogan
+                            Text("点一下，出码，走人。无广告、不联网、不要权限，配置只存在本机。")
+                                .font(.system(size: 11))
+                                .foregroundColor(secondaryTextColor.opacity(0.8))
+                                .multilineTextAlignment(.center)
+                                .padding(.top, 2)
                         }
                     }
                 }
@@ -198,5 +301,17 @@ struct SettingsView: View {
     
     private var cardBorder: Color {
         isDarkMode ? Color(hex: "2E3844") : Color(hex: "E5E7EB")
+    }
+    
+    private func aboutRow(title: String, value: String) -> some View {
+        HStack {
+            Text(title)
+                .font(.system(size: 13))
+                .foregroundColor(secondaryTextColor)
+            Spacer()
+            Text(value)
+                .font(.system(size: 13, weight: .medium))
+                .foregroundColor(isDarkMode ? Color(hex: "E5E7EB") : Color(hex: "374151"))
+        }
     }
 }

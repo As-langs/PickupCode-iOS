@@ -1,10 +1,68 @@
-import uuid, plistlib, os, subprocess
+import uuid, plistlib, os, subprocess, urllib.parse
 
 proj_dir = '/Users/zouh/.gemini/antigravity/scratch/PickupCode-iOS'
 shortcuts_dir = os.path.join(proj_dir, 'Shortcuts')
 release_dir = os.path.join(proj_dir, 'release_assets')
 os.makedirs(shortcuts_dir, exist_ok=True)
 os.makedirs(release_dir, exist_ok=True)
+
+# Smart redirect HTML: Tries pickupcode://home; if not installed, redirects to GitHub project homepage
+redirect_html = '''<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>打开取件快码</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      margin: 0; padding: 0;
+      background: #f8f9fa;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      min-height: 80vh;
+      color: #1f2937;
+      text-align: center;
+    }
+    .card {
+      background: #ffffff;
+      padding: 32px 24px;
+      border-radius: 20px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+      max-width: 320px;
+      width: 85%;
+    }
+    .icon { font-size: 40px; margin-bottom: 12px; }
+    h2 { font-size: 18px; margin: 0 0 8px 0; font-weight: 700; }
+    p { font-size: 13px; color: #6b7280; margin: 0 0 20px 0; line-height: 1.5; }
+    .btn {
+      display: inline-block;
+      padding: 11px 22px;
+      background: #00A870;
+      color: #ffffff;
+      text-decoration: none;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 600;
+    }
+  </style>
+  <script>
+    window.location.href = "pickupcode://home";
+    setTimeout(function() {
+      window.location.href = "https://github.com/As-langs/PickupCode-iOS";
+    }, 1200);
+  </script>
+</head>
+<body>
+  <div class="card">
+    <div class="icon">📦</div>
+    <h2>正在打开取件快码...</h2>
+    <p>若本机已安装将自动唤起应用；<br>若未安装，正在为您跳转至 GitHub 项目主页。</p>
+    <a class="btn" href="https://github.com/As-langs/PickupCode-iOS">前往 GitHub 主页</a>
+  </div>
+</body>
+</html>'''
+
+data_redirect_url = 'data:text/html;charset=utf-8,' + urllib.parse.quote(redirect_html)
 
 # ----------------- Shortcut 1: 取件身份码 (4 items) -----------------
 s1_items = [
@@ -79,7 +137,7 @@ s2_items = [
     ('抖音待取', 'snssdk1128://ecom_order_list'),
     ('快手待取', 'kwai://webview?url=https%3A%2F%2Fapp.kwaixiaodian.com%2Fpage%2Fkwaishop-trade-order-list-app%3FlayoutType%3D4%26hyId%3DkwaishopOrder'),
     ('得物待取', 'dewuapp://m.dewu.com/router/order/buyer/orderList?tabId=0'),
-    ('小红书待取', 'xhsdiscover://rn/lancer-order/order/list')
+    ('小红书待取', 'xhsdiscover://home/store')
 ]
 
 menu_uuid_2 = str(uuid.uuid4()).upper()
@@ -255,7 +313,7 @@ combo_actions.append({
     }
 })
 
-# Outer Case 3: 打开软件首页 (pickupcode://home)
+# Outer Case 3: 打开软件首页 (检测本机是否安装，未安装则跳转 GitHub)
 combo_actions.append({
     'WFWorkflowActionIdentifier': 'is.workflow.actions.choosefrommenu',
     'WFWorkflowActionParameters': {
@@ -267,13 +325,13 @@ combo_actions.append({
 combo_actions.append({
     'WFWorkflowActionIdentifier': 'is.workflow.actions.url',
     'WFWorkflowActionParameters': {
-        'WFURLActionURL': 'pickupcode://home'
+        'WFURLActionURL': data_redirect_url
     }
 })
 combo_actions.append({
     'WFWorkflowActionIdentifier': 'is.workflow.actions.openurl',
     'WFWorkflowActionParameters': {
-        'WFInput': 'pickupcode://home'
+        'WFInput': data_redirect_url
     }
 })
 

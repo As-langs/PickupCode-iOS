@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>打开取件快码</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      margin: 0; padding: 0;
+      background: #f8f9fa;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      min-height: 80vh;
+      color: #1f2937;
+      text-align: center;
+    }
+    .card {
+      background: #ffffff;
+      padding: 32px 24px;
+      border-radius: 20px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+      max-width: 320px;
+      width: 85%;
+    }
+    .icon { font-size: 40px; margin-bottom: 12px; }
+    h2 { font-size: 18px; margin: 0 0 8px 0; font-weight: 700; }
+    p { font-size: 13px; color: #6b7280; margin: 0 0 20px 0; line-height: 1.5; }
+    .btn {
+      display: inline-block;
+      padding: 11px 22px;
+      background: #00A870;
+      color: #ffffff;
+      text-decoration: none;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 600;
+    }
+  </style>
+  <script>
+    window.location.href = "pickupcode://home";
+    setTimeout(function() {
+      window.location.href = "https://github.com/As-langs/PickupCode-iOS";
+    }, 1200);
+  </script>
+</head>
+<body>
+  <div class="card">
+    <div class="icon">📦</div>
+    <h2>正在打开取件快码...</h2>
+    <p>若本机已安装将自动唤起应用；<br>若未安装，正在为您跳转至 GitHub 项目主页。</p>
+    <a class="btn" href="https://github.com/As-langs/PickupCode-iOS">前往 GitHub 主页</a>
+  </div>
+</body>
+</html>

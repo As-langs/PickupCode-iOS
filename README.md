@@ -127,11 +127,3 @@ PickupCode-iOS/
 ├── build_shortcuts.py            # 快捷指令生成与官方签名脚本
 └── generate_pbxproj.py           # Xcode 工程配置同步脚本
 ```
-
----
-
-## 👥 致谢
-
-- **iOS 版本开发**：Hans
-- **特别致谢**：然后啊然后
-- **Android 原作**：[酷安 @原作者 (UID: 27888540)](https://www.coolapk.com/u/27888540)

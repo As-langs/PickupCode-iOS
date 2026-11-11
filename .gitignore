@@ -22,6 +22,18 @@ ipa_build/
 PickupCodeWidget/PickupCodeWidget
 PickupCodeWidget/_CodeSignature/
 
+# APK and Android builds (strictly exclude from git)
+*.apk
+release_assets/*.apk
+*.idsig
+*.apk.*
+android/
+apktool_src/
+jadx_src/
+dexdump.txt
+resources_dump.txt
+build_out/
+
 # OS
 .DS_Store
 .DS_Store?

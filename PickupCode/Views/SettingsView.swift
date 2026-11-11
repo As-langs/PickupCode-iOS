@@ -68,26 +68,10 @@ struct SettingsView: View {
                             .padding(.vertical, 4)
                         }
                     }
-                    
-                    // MARK: - About & Credits Section
-                    VStack(spacing: 8) {
-                        Text("取件快码 v2.0.0 for iOS")
-                            .font(.system(size: 14, weight: .semibold))
-                            .foregroundColor(.secondary)
-                        
-                        Text("作者：Hans")
-                            .font(.system(size: 13, weight: .medium))
-                            .foregroundColor(.primary)
-                        
-                        Text("致谢：然后啊然后")
-                            .font(.system(size: 12))
-                            .foregroundColor(.secondary)
-                    }
-                    .padding(.top, 24)
-                    .padding(.bottom, 32)
                 }
                 .padding(.horizontal, 20)
                 .padding(.top, 16)
+                .padding(.bottom, 32)
             }
             .background(pageBackground.ignoresSafeArea())
             .navigationTitle("设置")

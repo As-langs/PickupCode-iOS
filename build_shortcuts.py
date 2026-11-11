@@ -199,10 +199,14 @@ s2_dict = {
 menu_outer_uuid = str(uuid.uuid4()).upper()
 menu_inner1_uuid = str(uuid.uuid4()).upper()
 menu_inner2_uuid = str(uuid.uuid4()).upper()
+menu_inner3_uuid = str(uuid.uuid4()).upper()
 
 item1_title = '🪪 驿站身份码 (菜鸟/淘宝/京东/多多)'
 item2_title = '📦 查询快递待取 (9大电商与快递入口)'
-item3_title = '🚀 打开取件快码 (软件首页)'
+item3_title = '🚀 打开取件快码 (软件首页/下载)'
+
+item3_sub1 = '📱 已安装：直接打开取件快码'
+item3_sub2 = '🌐 未安装：前往 GitHub 项目主页'
 
 combo_actions = [
     {
@@ -313,7 +317,7 @@ combo_actions.append({
     }
 })
 
-# Outer Case 3: 打开软件首页 (检测本机是否安装，未安装则跳转 GitHub)
+# Outer Case 3: 打开软件首页 (已安装直达首页，未安装前往 GitHub)
 combo_actions.append({
     'WFWorkflowActionIdentifier': 'is.workflow.actions.choosefrommenu',
     'WFWorkflowActionParameters': {
@@ -322,16 +326,68 @@ combo_actions.append({
         'WFMenuItemTitle': item3_title
     }
 })
+
+# Sub Menu: 判断是否已安装取件快码
+combo_actions.append({
+    'WFWorkflowActionIdentifier': 'is.workflow.actions.choosefrommenu',
+    'WFWorkflowActionParameters': {
+        'GroupingIdentifier': menu_inner3_uuid,
+        'WFControlFlowMode': 0,
+        'WFMenuItems': [item3_sub1, item3_sub2],
+        'WFMenuPrompt': '本机是否已安装「取件快码」应用？'
+    }
+})
+
+# Sub Branch 1: 已安装 -> 打开 pickupcode://home
+combo_actions.append({
+    'WFWorkflowActionIdentifier': 'is.workflow.actions.choosefrommenu',
+    'WFWorkflowActionParameters': {
+        'GroupingIdentifier': menu_inner3_uuid,
+        'WFControlFlowMode': 1,
+        'WFMenuItemTitle': item3_sub1
+    }
+})
 combo_actions.append({
     'WFWorkflowActionIdentifier': 'is.workflow.actions.url',
     'WFWorkflowActionParameters': {
-        'WFURLActionURL': data_redirect_url
+        'WFURLActionURL': 'pickupcode://home'
     }
 })
 combo_actions.append({
     'WFWorkflowActionIdentifier': 'is.workflow.actions.openurl',
     'WFWorkflowActionParameters': {
-        'WFInput': data_redirect_url
+        'WFInput': 'pickupcode://home'
+    }
+})
+
+# Sub Branch 2: 未安装 -> 跳转 GitHub 项目主页
+combo_actions.append({
+    'WFWorkflowActionIdentifier': 'is.workflow.actions.choosefrommenu',
+    'WFWorkflowActionParameters': {
+        'GroupingIdentifier': menu_inner3_uuid,
+        'WFControlFlowMode': 1,
+        'WFMenuItemTitle': item3_sub2
+    }
+})
+combo_actions.append({
+    'WFWorkflowActionIdentifier': 'is.workflow.actions.url',
+    'WFWorkflowActionParameters': {
+        'WFURLActionURL': 'https://github.com/As-langs/PickupCode-iOS'
+    }
+})
+combo_actions.append({
+    'WFWorkflowActionIdentifier': 'is.workflow.actions.openurl',
+    'WFWorkflowActionParameters': {
+        'WFInput': 'https://github.com/As-langs/PickupCode-iOS'
+    }
+})
+
+# Sub Menu End
+combo_actions.append({
+    'WFWorkflowActionIdentifier': 'is.workflow.actions.choosefrommenu',
+    'WFWorkflowActionParameters': {
+        'GroupingIdentifier': menu_inner3_uuid,
+        'WFControlFlowMode': 2
     }
 })
 

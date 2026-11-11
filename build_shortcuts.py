@@ -3,7 +3,6 @@ import uuid, plistlib, os, subprocess
 proj_dir = '/Users/zouh/.gemini/antigravity/scratch/PickupCode-iOS'
 shortcuts_dir = os.path.join(proj_dir, 'Shortcuts')
 release_dir = os.path.join(proj_dir, 'release_assets')
-downloads_dir = '/Users/zouh/Downloads'
 os.makedirs(shortcuts_dir, exist_ok=True)
 os.makedirs(release_dir, exist_ok=True)
 
@@ -138,10 +137,14 @@ s2_dict = {
     'WFWorkflowTypes': ['NCWidget', 'ActionExtension']
 }
 
-# ----------------- Shortcut 3: 取件快码 二合一 (13 items total) -----------------
+# ----------------- Shortcut 3: 取件快码 三合一 (身份码 + 待收货 + 打开首页) -----------------
 menu_outer_uuid = str(uuid.uuid4()).upper()
 menu_inner1_uuid = str(uuid.uuid4()).upper()
 menu_inner2_uuid = str(uuid.uuid4()).upper()
+
+item1_title = '🪪 驿站身份码 (菜鸟/淘宝/京东/多多)'
+item2_title = '📦 查询快递待取 (9大电商与快递入口)'
+item3_title = '🚀 打开取件快码 (软件首页)'
 
 combo_actions = [
     {
@@ -149,8 +152,8 @@ combo_actions = [
         'WFWorkflowActionParameters': {
             'GroupingIdentifier': menu_outer_uuid,
             'WFControlFlowMode': 0,
-            'WFMenuItems': ['🪪 驿站身份码 (菜鸟/淘宝/京东/多多)', '📦 查询快递待取 (9大电商与快递入口)'],
-            'WFMenuPrompt': '取件快码 v2.0 - 请选择模式'
+            'WFMenuItems': [item1_title, item2_title, item3_title],
+            'WFMenuPrompt': '取件快码 v2.0 - 请选择操作'
         }
     },
     # Outer Case 1: 身份码
@@ -159,7 +162,7 @@ combo_actions = [
         'WFWorkflowActionParameters': {
             'GroupingIdentifier': menu_outer_uuid,
             'WFControlFlowMode': 1,
-            'WFMenuItemTitle': '🪪 驿站身份码 (菜鸟/淘宝/京东/多多)'
+            'WFMenuItemTitle': item1_title
         }
     },
     {
@@ -209,7 +212,7 @@ combo_actions.append({
     'WFWorkflowActionParameters': {
         'GroupingIdentifier': menu_outer_uuid,
         'WFControlFlowMode': 1,
-        'WFMenuItemTitle': '📦 查询快递待取 (9大电商与快递入口)'
+        'WFMenuItemTitle': item2_title
     }
 })
 combo_actions.append({
@@ -252,6 +255,28 @@ combo_actions.append({
     }
 })
 
+# Outer Case 3: 打开软件首页 (pickupcode://home)
+combo_actions.append({
+    'WFWorkflowActionIdentifier': 'is.workflow.actions.choosefrommenu',
+    'WFWorkflowActionParameters': {
+        'GroupingIdentifier': menu_outer_uuid,
+        'WFControlFlowMode': 1,
+        'WFMenuItemTitle': item3_title
+    }
+})
+combo_actions.append({
+    'WFWorkflowActionIdentifier': 'is.workflow.actions.url',
+    'WFWorkflowActionParameters': {
+        'WFURLActionURL': 'pickupcode://home'
+    }
+})
+combo_actions.append({
+    'WFWorkflowActionIdentifier': 'is.workflow.actions.openurl',
+    'WFWorkflowActionParameters': {
+        'WFInput': 'pickupcode://home'
+    }
+})
+
 # Outer Menu End
 combo_actions.append({
     'WFWorkflowActionIdentifier': 'is.workflow.actions.choosefrommenu',
@@ -276,7 +301,7 @@ combo_dict = {
 targets = [
     ('取件身份码_raw.shortcut', '取件身份码.shortcut', 'PickupCode_ID_取件身份码.shortcut', s1_dict),
     ('快递待取_raw.shortcut', '快递待取.shortcut', 'PickupCode_Packages_快递待取.shortcut', s2_dict),
-    ('取件快码_二合一_raw.shortcut', '取件快码_二合一.shortcut', 'PickupCode_AllInOne_取件快码.shortcut', combo_dict)
+    ('取件快码_三合一_raw.shortcut', '取件快码_三合一.shortcut', 'PickupCode_AllInOne_取件快码.shortcut', combo_dict)
 ]
 
 for raw_name, signed_name, release_name, d in targets:
@@ -289,7 +314,11 @@ for raw_name, signed_name, release_name, d in targets:
     
     print(f'Signing {signed_name}...')
     subprocess.run(['shortcuts', 'sign', '--mode', 'anyone', '--input', raw_path, '--output', signed_path], check=True)
-    subprocess.run(['cp', signed_path, release_path], check=True)
+    subprocess.run(['cp', '-f', signed_path, release_path], check=True)
     os.remove(raw_path)
+
+# Also create a copy named 取件快码_三合一.shortcut in release_assets
+cp_combo_release = os.path.join(release_dir, '取件快码_三合一.shortcut')
+subprocess.run(['cp', '-f', os.path.join(shortcuts_dir, '取件快码_三合一.shortcut'), cp_combo_release], check=True)
 
 print('All 3 shortcuts regenerated and signed for v2.0.0!')

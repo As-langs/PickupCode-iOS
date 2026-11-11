@@ -205,7 +205,7 @@ item1_title = '🪪 驿站身份码 (菜鸟/淘宝/京东/多多)'
 item2_title = '📦 查询快递待取 (9大电商与快递入口)'
 item3_title = '🚀 打开取件快码 (软件首页/下载)'
 
-item3_sub1 = '📱 已安装：直接打开取件快码'
+item3_sub1 = '📱 已安装：直接打开（以后记住自动秒开）'
 item3_sub2 = '🌐 未安装：前往 GitHub 项目主页'
 
 combo_actions = [
@@ -317,7 +317,7 @@ combo_actions.append({
     }
 })
 
-# Outer Case 3: 打开软件首页 (已安装直达首页，未安装前往 GitHub)
+# Outer Case 3: 打开软件首页 (首次询问，点击已安装后记录状态，后续自动打开)
 combo_actions.append({
     'WFWorkflowActionIdentifier': 'is.workflow.actions.choosefrommenu',
     'WFWorkflowActionParameters': {
@@ -327,24 +327,111 @@ combo_actions.append({
     }
 })
 
-# Sub Menu: 判断是否已安装取件快码
+open_file_uuid = str(uuid.uuid4()).upper()
+cond_uuid = str(uuid.uuid4()).upper()
+
+# 1. 尝试静默读取标记文件 (Shortcuts/pickupcode_installed.txt)
+combo_actions.append({
+    'WFWorkflowActionIdentifier': 'is.workflow.actions.documentpicker.open',
+    'WFWorkflowActionParameters': {
+        'UUID': open_file_uuid,
+        'WFGetFilePath': 'pickupcode_installed.txt',
+        'WFShowFilePicker': False,
+        'WFFileErrorIfNotFound': False
+    }
+})
+
+# 2. 条件判断：如果标记文件已存在 (已记录过已安装)
+combo_actions.append({
+    'WFWorkflowActionIdentifier': 'is.workflow.actions.conditional',
+    'WFWorkflowActionParameters': {
+        'GroupingIdentifier': cond_uuid,
+        'WFControlFlowMode': 0,
+        'WFCondition': 99,  # Has any value
+        'WFInput': {
+            'Type': 'Variable',
+            'Variable': {
+                'Value': {
+                    'OutputName': 'File',
+                    'OutputUUID': open_file_uuid,
+                    'Type': 'ActionOutput'
+                },
+                'WFSerializationType': 'WFTextTokenAttachment'
+            }
+        }
+    }
+})
+
+# 2.1 [已安装记录存在]：直接秒开 App 首页
+combo_actions.append({
+    'WFWorkflowActionIdentifier': 'is.workflow.actions.url',
+    'WFWorkflowActionParameters': {
+        'WFURLActionURL': 'pickupcode://home'
+    }
+})
+combo_actions.append({
+    'WFWorkflowActionIdentifier': 'is.workflow.actions.openurl',
+    'WFWorkflowActionParameters': {
+        'WFInput': 'pickupcode://home'
+    }
+})
+
+# 2.2 [首次运行 / 标记文件不存在]：进入 Otherwise 询问分支
+combo_actions.append({
+    'WFWorkflowActionIdentifier': 'is.workflow.actions.conditional',
+    'WFWorkflowActionParameters': {
+        'GroupingIdentifier': cond_uuid,
+        'WFControlFlowMode': 1
+    }
+})
+
 combo_actions.append({
     'WFWorkflowActionIdentifier': 'is.workflow.actions.choosefrommenu',
     'WFWorkflowActionParameters': {
         'GroupingIdentifier': menu_inner3_uuid,
         'WFControlFlowMode': 0,
         'WFMenuItems': [item3_sub1, item3_sub2],
-        'WFMenuPrompt': '本机是否已安装「取件快码」应用？'
+        'WFMenuPrompt': '首次使用：本机是否已安装「取件快码」？'
     }
 })
 
-# Sub Branch 1: 已安装 -> 打开 pickupcode://home
+# 首次分支 1: 已安装 -> 写入标记文件，以后永不询问，并直接打开
+save_text_uuid = str(uuid.uuid4()).upper()
+save_file_uuid = str(uuid.uuid4()).upper()
+
 combo_actions.append({
     'WFWorkflowActionIdentifier': 'is.workflow.actions.choosefrommenu',
     'WFWorkflowActionParameters': {
         'GroupingIdentifier': menu_inner3_uuid,
         'WFControlFlowMode': 1,
         'WFMenuItemTitle': item3_sub1
+    }
+})
+combo_actions.append({
+    'WFWorkflowActionIdentifier': 'is.workflow.actions.gettext',
+    'WFWorkflowActionParameters': {
+        'UUID': save_text_uuid,
+        'WFTextActionText': 'installed'
+    }
+})
+combo_actions.append({
+    'WFWorkflowActionIdentifier': 'is.workflow.actions.documentpicker.save',
+    'WFWorkflowActionParameters': {
+        'UUID': save_file_uuid,
+        'WFFileDestinationPath': 'pickupcode_installed.txt',
+        'WFAskWhereToSave': False,
+        'WFSaveFileOverwrite': True,
+        'WFInput': {
+            'Type': 'Variable',
+            'Variable': {
+                'Value': {
+                    'OutputName': 'Text',
+                    'OutputUUID': save_text_uuid,
+                    'Type': 'ActionOutput'
+                },
+                'WFSerializationType': 'WFTextTokenAttachment'
+            }
+        }
     }
 })
 combo_actions.append({
@@ -360,7 +447,7 @@ combo_actions.append({
     }
 })
 
-# Sub Branch 2: 未安装 -> 跳转 GitHub 项目主页
+# 首次分支 2: 未安装 -> 跳转 GitHub 项目主页
 combo_actions.append({
     'WFWorkflowActionIdentifier': 'is.workflow.actions.choosefrommenu',
     'WFWorkflowActionParameters': {
@@ -382,11 +469,20 @@ combo_actions.append({
     }
 })
 
-# Sub Menu End
+# 结束首次询问子菜单
 combo_actions.append({
     'WFWorkflowActionIdentifier': 'is.workflow.actions.choosefrommenu',
     'WFWorkflowActionParameters': {
         'GroupingIdentifier': menu_inner3_uuid,
+        'WFControlFlowMode': 2
+    }
+})
+
+# 结束条件判断 (End If)
+combo_actions.append({
+    'WFWorkflowActionIdentifier': 'is.workflow.actions.conditional',
+    'WFWorkflowActionParameters': {
+        'GroupingIdentifier': cond_uuid,
         'WFControlFlowMode': 2
     }
 })

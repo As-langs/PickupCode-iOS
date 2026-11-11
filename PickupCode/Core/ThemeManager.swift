@@ -71,6 +71,22 @@ class ThemeManager: ObservableObject {
     
     private let prefs = UserDefaults.standard
     
+    static let defaultEntries: [EntryKey] = [
+        .cainiaoCode,
+        .taobaoCode,
+        .taobaoCainiaoPending,
+        .pddCode,
+        .pddPickup,
+        .jdCode,
+        .taobaoPending,
+        .pddPending,
+        .jdPending,
+        .douyinPending,
+        .kuaishouPending,
+        .dewuPending,
+        .xhsPending
+    ]
+    
     @Published var uiStyle: UiStyle {
         didSet {
             prefs.set(uiStyle.rawValue, forKey: "ui_style")
@@ -89,6 +105,13 @@ class ThemeManager: ObservableObject {
         }
     }
     
+    @Published var orderEntries: [EntryKey] = []
+    @Published var hiddenEntries: Set<EntryKey> = []
+    
+    var visibleEntries: [EntryKey] {
+        orderEntries.filter { !hiddenEntries.contains($0) }
+    }
+    
     init() {
         let styleVal = prefs.integer(forKey: "ui_style")
         self.uiStyle = UiStyle(rawValue: styleVal) ?? .paper
@@ -98,6 +121,8 @@ class ThemeManager: ObservableObject {
         
         let colVal = prefs.integer(forKey: "grid_columns")
         self.gridColumns = GridColumnSetting(rawValue: colVal == 0 ? 1 : colVal) ?? .one
+        
+        loadOrderAndHidden()
     }
     
     var colorScheme: ColorScheme? {
@@ -106,6 +131,111 @@ class ThemeManager: ObservableObject {
         case .forceLight:   return .light
         case .forceDark:    return .dark
         }
+    }
+    
+    // MARK: - Entry Order & Visibility Management
+    
+    func loadOrderAndHidden() {
+        // 1. Load hidden entries
+        if let hiddenStr = prefs.string(forKey: "key_hidden_entries") {
+            let keys = hiddenStr.split(separator: ",").map { String($0).trimmingCharacters(in: .whitespaces) }
+            self.hiddenEntries = Set(keys.compactMap { EntryKey(rawValue: $0) })
+        } else {
+            self.hiddenEntries = []
+        }
+        
+        // 2. Load order entries
+        if let saved = prefs.string(forKey: "order_entries_v2") {
+            let keys = saved.split(separator: ",").map { String($0).trimmingCharacters(in: .whitespaces) }
+            let loaded = keys.compactMap { EntryKey(rawValue: $0) }
+            var result = loaded.filter { Self.defaultEntries.contains($0) }
+            var hasNew = false
+            for item in Self.defaultEntries {
+                if !result.contains(item) {
+                    result.append(item)
+                    hasNew = true
+                }
+            }
+            self.orderEntries = result.isEmpty ? Self.defaultEntries : result
+            if hasNew {
+                saveOrder()
+            }
+        } else {
+            // Check legacy order_code and order_query for upgrade compatibility
+            var legacyList: [EntryKey] = []
+            if let savedCode = prefs.string(forKey: "order_code") {
+                let keys = savedCode.split(separator: ",").map { String($0).trimmingCharacters(in: .whitespaces) }
+                legacyList.append(contentsOf: keys.compactMap { EntryKey(rawValue: $0) })
+            }
+            if let savedQuery = prefs.string(forKey: "order_query") {
+                let keys = savedQuery.split(separator: ",").map { String($0).trimmingCharacters(in: .whitespaces) }
+                legacyList.append(contentsOf: keys.compactMap { EntryKey(rawValue: $0) })
+            }
+            
+            var result = legacyList.filter { Self.defaultEntries.contains($0) }
+            for item in Self.defaultEntries {
+                if !result.contains(item) {
+                    result.append(item)
+                }
+            }
+            self.orderEntries = result.isEmpty ? Self.defaultEntries : result
+            saveOrder()
+        }
+    }
+    
+    func isHidden(_ key: EntryKey) -> Bool {
+        hiddenEntries.contains(key)
+    }
+    
+    func toggleHidden(_ key: EntryKey) {
+        if hiddenEntries.contains(key) {
+            hiddenEntries.remove(key)
+        } else {
+            // Keep at least 1 entry visible
+            if visibleEntries.count > 1 {
+                hiddenEntries.insert(key)
+            }
+        }
+        saveHidden()
+    }
+    
+    func hide(_ key: EntryKey) {
+        if visibleEntries.count > 1 {
+            hiddenEntries.insert(key)
+            saveHidden()
+        }
+    }
+    
+    func show(_ key: EntryKey) {
+        hiddenEntries.remove(key)
+        saveHidden()
+    }
+    
+    func showAll() {
+        hiddenEntries.removeAll()
+        saveHidden()
+    }
+    
+    func move(from source: IndexSet, to destination: Int) {
+        orderEntries.move(fromOffsets: source, toOffset: destination)
+        saveOrder()
+    }
+    
+    func resetOrderAndVisibility() {
+        orderEntries = Self.defaultEntries
+        hiddenEntries.removeAll()
+        saveOrder()
+        saveHidden()
+    }
+    
+    private func saveOrder() {
+        let str = orderEntries.map { $0.rawValue }.joined(separator: ",")
+        prefs.set(str, forKey: "order_entries_v2")
+    }
+    
+    private func saveHidden() {
+        let str = hiddenEntries.map { $0.rawValue }.joined(separator: ",")
+        prefs.set(str, forKey: "key_hidden_entries")
     }
 }
 

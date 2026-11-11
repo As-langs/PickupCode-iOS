@@ -8,26 +8,7 @@ struct ContentView: View {
     @Environment(\.scenePhase) private var scenePhase
     
     @State private var showingSettings = false
-    @State private var isEditingOrder = false
-    
-    @State private var entries: [EntryKey] = [
-        .cainiaoCode,
-        .taobaoCode,
-        .taobaoCainiaoPending,
-        .pddCode,
-        .pddPickup,
-        .jdCode,
-        .taobaoPending,
-        .pddPending,
-        .jdPending,
-        .douyinPending,
-        .kuaishouPending,
-        .dewuPending,
-        .xhsPending
-    ]
-    
-    private let prefs = UserDefaults.standard
-    private let keyOrderEntries = "order_entries_v2"
+    @State private var showingManagementSheet = false
     
     private var isDarkMode: Bool {
         if let mode = themeManager.colorScheme {
@@ -60,9 +41,9 @@ struct ContentView: View {
                     
                     // Drag / Edit Hint
                     HStack(spacing: 6) {
-                        Image(systemName: isEditingOrder ? "checkmark.circle" : "arrow.up.arrow.down")
+                        Image(systemName: "hand.tap")
                             .font(.system(size: 12))
-                        Text(isEditingOrder ? "拖动右侧把手完成排序" : "点右上角编辑可拖动排序 · 点卡片极速直达")
+                        Text("长按卡片可隐藏入口 · 点击右上角可拖动排序与管理")
                             .font(.system(size: 13, weight: .regular))
                     }
                     .foregroundColor(secondaryTextColor.opacity(0.8))
@@ -71,7 +52,6 @@ struct ContentView: View {
                 }
                 .padding(.horizontal, 20)
             }
-            .environment(\.editMode, isEditingOrder ? .constant(.active) : .constant(.inactive))
             
             // Toast Overlay
             if let toast = activeToastMessage {
@@ -85,18 +65,23 @@ struct ContentView: View {
             }
         }
         .onAppear {
-            loadOrder()
+            themeManager.loadOrderAndHidden()
         }
         .onChange(of: scenePhase) { newPhase in
             if newPhase == .active {
-                loadOrder()
+                themeManager.loadOrderAndHidden()
             }
         }
-        .sheet(isPresented: $showingSettings, onDismiss: {
-            loadOrder()
-        }) {
+        .sheet(isPresented: $showingSettings) {
             SettingsView()
                 .environmentObject(themeManager)
+        }
+        .sheet(isPresented: $showingManagementSheet) {
+            EntryManagementView()
+                .environmentObject(themeManager)
+        }
+        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("OpenEntryManagement"))) { _ in
+            showingManagementSheet = true
         }
     }
     
@@ -136,17 +121,15 @@ struct ContentView: View {
                         )
                 }
                 
-                // Edit/Reorder toggle
+                // Entrance Management & Reorder button
                 Button(action: {
-                    withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
-                        isEditingOrder.toggle()
-                    }
+                    showingManagementSheet = true
                 }) {
-                    Image(systemName: isEditingOrder ? "checkmark" : "arrow.up.arrow.down")
+                    Image(systemName: "arrow.up.arrow.down")
                         .font(.system(size: 14, weight: .semibold))
-                        .foregroundColor(isEditingOrder ? .white : primaryTextColor)
+                        .foregroundColor(primaryTextColor)
                         .frame(width: 38, height: 38)
-                        .background(isEditingOrder ? Color.blue : headerButtonBackground)
+                        .background(headerButtonBackground)
                         .clipShape(Circle())
                         .overlay(
                             Circle()
@@ -192,7 +175,7 @@ struct ContentView: View {
                     .font(.system(size: 17, weight: .bold, design: .rounded))
                     .foregroundColor(primaryTextColor)
                 
-                Text("\(entries.count) 个平台直达")
+                Text("\(themeManager.visibleEntries.count) 个平台直达")
                     .font(.system(size: 11, weight: .semibold))
                     .foregroundColor(themeAccentColor)
                     .padding(.horizontal, 8)
@@ -202,11 +185,42 @@ struct ContentView: View {
                             .fill(themeAccentColor.opacity(0.12))
                     )
                 
+                if !themeManager.hiddenEntries.isEmpty {
+                    Button(action: { showingManagementSheet = true }) {
+                        HStack(spacing: 3) {
+                            Image(systemName: "eye.slash")
+                                .font(.system(size: 10))
+                            Text("已隐藏 \(themeManager.hiddenEntries.count) 项")
+                                .font(.system(size: 11, weight: .medium))
+                        }
+                        .foregroundColor(.secondary)
+                        .padding(.horizontal, 7)
+                        .padding(.vertical, 3)
+                        .background(
+                            Capsule()
+                                .fill(Color.gray.opacity(0.12))
+                        )
+                    }
+                }
+                
                 Spacer()
                 
-                Text(themeManager.gridColumns.title)
-                    .font(.system(size: 12, weight: .regular))
-                    .foregroundColor(secondaryTextColor)
+                // Entrance & order management button
+                Button(action: { showingManagementSheet = true }) {
+                    HStack(spacing: 4) {
+                        Image(systemName: "slider.horizontal.3")
+                            .font(.system(size: 11, weight: .semibold))
+                        Text("管理")
+                            .font(.system(size: 12, weight: .semibold))
+                    }
+                    .foregroundColor(themeAccentColor)
+                    .padding(.horizontal, 9)
+                    .padding(.vertical, 4)
+                    .background(
+                        Capsule()
+                            .fill(themeAccentColor.opacity(0.1))
+                    )
+                }
             }
             .padding(.leading, 2)
             
@@ -214,16 +228,9 @@ struct ContentView: View {
             if themeManager.gridColumns == .one {
                 // One Column: List style
                 VStack(spacing: 10) {
-                    if isEditingOrder {
-                        ForEach(entries) { entry in
-                            EntryCardView(key: entry, isEditing: true) { }
-                        }
-                        .onMove(perform: moveEntry)
-                    } else {
-                        ForEach(entries) { entry in
-                            EntryCardView(key: entry, isEditing: false) {
-                                jumpManager.jump(to: entry)
-                            }
+                    ForEach(themeManager.visibleEntries) { entry in
+                        EntryCardView(key: entry, isEditing: false) {
+                            jumpManager.jump(to: entry)
                         }
                     }
                 }
@@ -231,11 +238,11 @@ struct ContentView: View {
                 // Two or Three Columns: Grid style
                 let cols = Array(repeating: GridItem(.flexible(), spacing: 10), count: themeManager.gridColumns.rawValue)
                 LazyVGrid(columns: cols, spacing: 10) {
-                    ForEach(entries) { entry in
+                    ForEach(themeManager.visibleEntries) { entry in
                         GridEntryCardView(
                             key: entry,
                             columns: themeManager.gridColumns.rawValue,
-                            isEditing: isEditingOrder
+                            isEditing: false
                         ) {
                             jumpManager.jump(to: entry)
                         }
@@ -243,73 +250,6 @@ struct ContentView: View {
                 }
             }
         }
-    }
-    
-    // MARK: - Reordering Logic
-    
-    private func moveEntry(from source: IndexSet, to destination: Int) {
-        entries.move(fromOffsets: source, toOffset: destination)
-        saveOrder()
-    }
-    
-    private func loadOrder() {
-        let defaultEntries: [EntryKey] = [
-            .cainiaoCode,
-            .taobaoCode,
-            .taobaoCainiaoPending,
-            .pddCode,
-            .pddPickup,
-            .jdCode,
-            .taobaoPending,
-            .pddPending,
-            .jdPending,
-            .douyinPending,
-            .kuaishouPending,
-            .dewuPending,
-            .xhsPending
-        ]
-        
-        if let saved = prefs.string(forKey: keyOrderEntries) {
-            let keys = saved.split(separator: ",").map { String($0).trimmingCharacters(in: .whitespaces) }
-            let loaded = keys.compactMap { EntryKey(rawValue: $0) }
-            var result = loaded.filter { defaultEntries.contains($0) }
-            var hasNew = false
-            for item in defaultEntries {
-                if !result.contains(item) {
-                    result.append(item)
-                    hasNew = true
-                }
-            }
-            self.entries = result.isEmpty ? defaultEntries : result
-            if hasNew {
-                saveOrder()
-            }
-        } else {
-            // Check legacy order_code and order_query for seamless upgrade
-            var legacyList: [EntryKey] = []
-            if let savedCode = prefs.string(forKey: "order_code") {
-                let keys = savedCode.split(separator: ",").map { String($0).trimmingCharacters(in: .whitespaces) }
-                legacyList.append(contentsOf: keys.compactMap { EntryKey(rawValue: $0) })
-            }
-            if let savedQuery = prefs.string(forKey: "order_query") {
-                let keys = savedQuery.split(separator: ",").map { String($0).trimmingCharacters(in: .whitespaces) }
-                legacyList.append(contentsOf: keys.compactMap { EntryKey(rawValue: $0) })
-            }
-            
-            var result = legacyList.filter { defaultEntries.contains($0) }
-            for item in defaultEntries {
-                if !result.contains(item) {
-                    result.append(item)
-                }
-            }
-            self.entries = result.isEmpty ? defaultEntries : result
-            saveOrder()
-        }
-    }
-    
-    private func saveOrder() {
-        let str = entries.map { $0.rawValue }.joined(separator: ",")
-        prefs.set(str, forKey: keyOrderEntries)
     }
     
     // MARK: - Theme Helpers

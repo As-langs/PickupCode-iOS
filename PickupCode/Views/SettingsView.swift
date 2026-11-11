@@ -4,12 +4,21 @@ struct SettingsView: View {
     @Environment(\.dismiss) var dismiss
     @EnvironmentObject var themeManager: ThemeManager
     @Environment(\.colorScheme) var systemColorScheme
+    @State private var showingEntryManagement = false
     
     private var isDarkMode: Bool {
         if let mode = themeManager.colorScheme {
             return mode == .dark
         }
         return systemColorScheme == .dark
+    }
+    
+    private var accentColor: Color {
+        switch themeManager.uiStyle {
+        case .paper: return Color(hex: "00A870")
+        case .glass: return Color(hex: "00B4D8")
+        case .flat:  return Color(hex: "4B5563")
+        }
     }
     
     var body: some View {
@@ -51,21 +60,40 @@ struct SettingsView: View {
                         }
                     }
                     
-                    // MARK: - Reset Order Section
-                    settingsSection(title: "入口与排序管理", subtitle: "长按主界面卡片右侧把手可自由拖拽自定义顺序") {
-                        Button(action: {
-                            UserDefaults.standard.removeObject(forKey: "order_code")
-                            UserDefaults.standard.removeObject(forKey: "order_query")
-                            dismiss()
-                        }) {
-                            HStack(spacing: 8) {
-                                Image(systemName: "arrow.counterclockwise")
-                                Text("重置默认排序（显示全部 13 个入口）")
-                                Spacer()
+                    // MARK: - Entry Management Section
+                    settingsSection(title: "入口与排序管理", subtitle: "支持自由拖拽排序及隐藏单个入口") {
+                        VStack(spacing: 10) {
+                            Button(action: {
+                                showingEntryManagement = true
+                            }) {
+                                HStack(spacing: 8) {
+                                    Image(systemName: "slider.horizontal.3")
+                                    Text("管理全部入口与拖动排序")
+                                    Spacer()
+                                    Image(systemName: "chevron.right")
+                                        .font(.system(size: 13, weight: .semibold))
+                                        .foregroundColor(.secondary)
+                                }
+                                .foregroundColor(accentColor)
+                                .font(.system(size: 14, weight: .semibold))
+                                .padding(.vertical, 4)
                             }
-                            .foregroundColor(Color(hex: "00A870"))
-                            .font(.system(size: 14, weight: .semibold))
-                            .padding(.vertical, 4)
+                            
+                            Divider()
+                            
+                            Button(action: {
+                                themeManager.resetOrderAndVisibility()
+                                JumpManager.shared.showToast("已恢复默认排序与显示")
+                            }) {
+                                HStack(spacing: 8) {
+                                    Image(systemName: "arrow.counterclockwise")
+                                    Text("恢复默认排序与显示（取消所有隐藏）")
+                                    Spacer()
+                                }
+                                .foregroundColor(Color.secondary)
+                                .font(.system(size: 14, weight: .medium))
+                                .padding(.vertical, 4)
+                            }
                         }
                     }
                 }
@@ -83,6 +111,10 @@ struct SettingsView: View {
                     }
                     .font(.system(size: 16, weight: .semibold))
                 }
+            }
+            .sheet(isPresented: $showingEntryManagement) {
+                EntryManagementView()
+                    .environmentObject(themeManager)
             }
         }
     }

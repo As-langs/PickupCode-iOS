@@ -199,8 +199,10 @@ enum EntryKey: String, CaseIterable, Identifiable, Codable {
             ]
         case .xhsPending:
             return [
-                "xhsdiscover://rn/lancer-order/order/list",
-                "xhsdiscover://rn/lancer-order/list",
+                "xhsdiscover://home/store",
+                "xhsdiscover://store",
+                "xhsdiscover://profile",
+                "xhsdiscover://rn/order/list",
                 "xhsdiscover://webview?link=https%3A%2F%2Fwww.xiaohongshu.com%2Forder%2Flist",
                 "xhsdiscover://home",
                 "xhsdiscover://"

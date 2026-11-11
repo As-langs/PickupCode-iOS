@@ -79,6 +79,21 @@ struct EntryCardView: View {
         }
         .buttonStyle(ScaleButtonStyle())
         .contextMenu {
+            Button(role: .destructive) {
+                withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
+                    themeManager.hide(key)
+                }
+                JumpManager.shared.showToast("已隐藏「\(key.title)」")
+            } label: {
+                Label("隐藏此入口", systemImage: "eye.slash")
+            }
+            
+            Button {
+                NotificationCenter.default.post(name: NSNotification.Name("OpenEntryManagement"), object: nil)
+            } label: {
+                Label("入口与排序管理", systemImage: "arrow.up.arrow.down")
+            }
+            
             if let webStr = key.webURLString, let url = URL(string: webStr) {
                 Button {
                     UIApplication.shared.open(url)
@@ -193,7 +208,7 @@ struct EntryCardView: View {
 struct ScaleButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .scaleEffect(configuration.isPressed ? 0.97 : 1.0)
+            .scaleEffect(configuration.isPressed ? 0.96 : 1.0)
             .animation(.easeInOut(duration: 0.15), value: configuration.isPressed)
     }
 }
@@ -260,6 +275,21 @@ struct GridEntryCardView: View {
         }
         .buttonStyle(ScaleButtonStyle())
         .contextMenu {
+            Button(role: .destructive) {
+                withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
+                    themeManager.hide(key)
+                }
+                JumpManager.shared.showToast("已隐藏「\(key.title)」")
+            } label: {
+                Label("隐藏此入口", systemImage: "eye.slash")
+            }
+            
+            Button {
+                NotificationCenter.default.post(name: NSNotification.Name("OpenEntryManagement"), object: nil)
+            } label: {
+                Label("入口与排序管理", systemImage: "arrow.up.arrow.down")
+            }
+            
             if let webStr = key.webURLString, let url = URL(string: webStr) {
                 Button {
                     UIApplication.shared.open(url)
@@ -351,5 +381,219 @@ struct GridEntryCardView: View {
         case .flat:
             return Color(hex: "E5E7EB")
         }
+    }
+}
+
+// MARK: - Entry Management & Reordering View
+
+struct EntryManagementView: View {
+    @Environment(\.dismiss) private var dismiss
+    @EnvironmentObject var themeManager: ThemeManager
+    @Environment(\.colorScheme) var systemColorScheme
+    
+    private var isDarkMode: Bool {
+        if let mode = themeManager.colorScheme {
+            return mode == .dark
+        }
+        return systemColorScheme == .dark
+    }
+    
+    private var accentColor: Color {
+        switch themeManager.uiStyle {
+        case .paper:
+            return Color(hex: "00A870")
+        case .glass:
+            return Color(hex: "00B4D8")
+        case .flat:
+            return Color(hex: "4B5563")
+        }
+    }
+    
+    private var secondaryTextColor: Color {
+        isDarkMode ? Color(hex: "9CA3AF") : Color(hex: "6B7280")
+    }
+    
+    var body: some View {
+        NavigationStack {
+            List {
+                Section {
+                    ForEach(themeManager.orderEntries) { entry in
+                        let isVisible = !themeManager.isHidden(entry)
+                        let visibleIdx = isVisible ? themeManager.visibleEntries.firstIndex(of: entry) : nil
+                        
+                        EntryManagementRow(
+                            entry: entry,
+                            isVisible: isVisible,
+                            orderNumber: visibleIdx != nil ? (visibleIdx! + 1) : nil
+                        ) {
+                            withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                                themeManager.toggleHidden(entry)
+                            }
+                        }
+                    }
+                    .onMove { source, dest in
+                        themeManager.move(from: source, to: dest)
+                    }
+                } header: {
+                    HStack {
+                        Text("全部入口 (共 \(themeManager.orderEntries.count) 项 · 已显示 \(themeManager.visibleEntries.count) 项)")
+                            .font(.system(size: 13, weight: .semibold))
+                            .foregroundColor(secondaryTextColor)
+                        Spacer()
+                    }
+                    .padding(.vertical, 4)
+                } footer: {
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text("💡 操作指南：")
+                            .font(.system(size: 12, weight: .semibold))
+                        Text("• 点击左侧圆圈：显示或隐藏对应入口（至少保留 1 个）")
+                        Text("• 长按并拖动右侧三条杠「≡」：可自由上下拖动排序")
+                        Text("• 长按主界面任意卡片也可快捷隐藏入口")
+                    }
+                    .font(.system(size: 11))
+                    .foregroundColor(secondaryTextColor.opacity(0.85))
+                    .padding(.top, 8)
+                }
+            }
+            .listStyle(.insetGrouped)
+            .environment(\.editMode, .constant(.active))
+            .navigationTitle("入口管理与排序")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Menu {
+                        Button {
+                            withAnimation(.spring()) {
+                                themeManager.showAll()
+                            }
+                            JumpManager.shared.showToast("已显示全部 13 个入口")
+                        } label: {
+                            Label("全部显示", systemImage: "eye")
+                        }
+                        
+                        Button(role: .destructive) {
+                            withAnimation(.spring()) {
+                                themeManager.resetOrderAndVisibility()
+                            }
+                            JumpManager.shared.showToast("已恢复默认排序与显示")
+                        } label: {
+                            Label("恢复默认排序与显示", systemImage: "arrow.counterclockwise")
+                        }
+                    } label: {
+                        HStack(spacing: 3) {
+                            Text("选项")
+                            Image(systemName: "chevron.down")
+                                .font(.system(size: 11, weight: .bold))
+                        }
+                        .font(.system(size: 15, weight: .medium))
+                        .foregroundColor(accentColor)
+                    }
+                }
+                
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("完成") {
+                        dismiss()
+                    }
+                    .font(.system(size: 16, weight: .bold))
+                    .foregroundColor(accentColor)
+                }
+            }
+        }
+    }
+}
+
+// MARK: - Entry Management Row
+
+struct EntryManagementRow: View {
+    let entry: EntryKey
+    let isVisible: Bool
+    let orderNumber: Int?
+    let onToggle: () -> Void
+    
+    @EnvironmentObject var themeManager: ThemeManager
+    @Environment(\.colorScheme) var systemColorScheme
+    
+    private var isDarkMode: Bool {
+        if let mode = themeManager.colorScheme {
+            return mode == .dark
+        }
+        return systemColorScheme == .dark
+    }
+    
+    private var accentColor: Color {
+        switch themeManager.uiStyle {
+        case .paper:
+            return Color(hex: "00A870")
+        case .glass:
+            return Color(hex: "00B4D8")
+        case .flat:
+            return Color(hex: "4B5563")
+        }
+    }
+    
+    var body: some View {
+        HStack(spacing: 12) {
+            // Checkmark / Number Toggle Button
+            Button(action: onToggle) {
+                ZStack {
+                    if isVisible, let num = orderNumber {
+                        Circle()
+                            .fill(accentColor)
+                            .frame(width: 24, height: 24)
+                        
+                        Text("\(num)")
+                            .font(.system(size: 12, weight: .bold, design: .rounded))
+                            .foregroundColor(.white)
+                    } else {
+                        Circle()
+                            .strokeBorder(Color.gray.opacity(0.4), lineWidth: 1.5)
+                            .frame(width: 24, height: 24)
+                        
+                        Circle()
+                            .fill(Color.gray.opacity(0.1))
+                            .frame(width: 14, height: 14)
+                    }
+                }
+            }
+            .buttonStyle(.plain)
+            
+            // Icon
+            ZStack {
+                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                    .fill(isDarkMode ? Color(hex: "27303B") : Color(hex: "F3F4F6"))
+                    .frame(width: 40, height: 40)
+                
+                PlatformIconView(name: entry.iconName, size: 28)
+            }
+            
+            // Title & Subtitle
+            VStack(alignment: .leading, spacing: 2) {
+                Text(entry.title)
+                    .font(.system(size: 15, weight: .semibold))
+                    .foregroundColor(isVisible ? (isDarkMode ? Color(hex: "F3F4F6") : Color(hex: "1F2937")) : Color.gray)
+                
+                Text(entry.subtitle)
+                    .font(.system(size: 11))
+                    .foregroundColor(Color.gray)
+            }
+            
+            Spacer()
+            
+            // Status Tag
+            Text(isVisible ? "已显示" : "未显示")
+                .font(.system(size: 11, weight: .medium))
+                .foregroundColor(isVisible ? accentColor : Color.gray)
+                .padding(.horizontal, 8)
+                .padding(.vertical, 3)
+                .background(
+                    Capsule()
+                        .fill(isVisible ? accentColor.opacity(0.12) : Color.gray.opacity(0.12))
+                )
+        }
+        .contentShape(Rectangle())
+        .onTapGesture {
+            onToggle()
+        }
+        .padding(.vertical, 4)
     }
 }

@@ -94,7 +94,7 @@ struct ContentView: View {
                     .font(.system(size: 28, weight: .bold, design: .rounded))
                     .foregroundColor(primaryTextColor)
                 
-                Text("四个身份码 · 九个查件入口")
+                Text("四个身份码 · 十个查件入口")
                     .font(.system(size: 13, weight: .medium))
                     .foregroundColor(secondaryTextColor)
             }

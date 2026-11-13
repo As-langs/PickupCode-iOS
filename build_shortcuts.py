@@ -127,14 +127,15 @@ s1_dict = {
     'WFWorkflowTypes': ['NCWidget', 'ActionExtension']
 }
 
-# ----------------- Shortcut 2: 快递待取 (9 items) -----------------
+# ----------------- Shortcut 2: 快递待取 (10 items) -----------------
 s2_items = [
     ('淘宝待收货', 'taobao://m.taobao.com/tbopen/index.html?action=ali.open.nav&h5Url=https%3A%2F%2Fh5.m.taobao.com%2Fawp%2Fmtb%2Folist.htm%3FtabCode%3DwaitConfirm'),
     ('淘宝菜鸟待取', 'taobao://m.taobao.com/tbopen/index.html?h5Url=https%3A%2F%2Fpages-fast.m.taobao.com%2Fwow%2Fz%2Funiapp%2F1100333%2Flast-mile-fe%2Fm-end-school-tab%2Fhome'),
-    ('京东待取', 'openapp.jdmobile://virtual?params=%7B%22category%22%3A%22jump%22%2C%22des%22%3A%22orderlist%22%7D'),
+    ('京东待取', 'openapp.jdmobile://virtual?params=%7B%22category%22%3A%22jump%22%2C%22des%22%3A%22orderlist%22%2C%22orderStatus%22%3A%223%22%7D'),
     ('拼多多取快递', 'pinduoduo://com.xunmeng.pinduoduo/mdkd/package'),
     ('拼多多待收货', 'pinduoduo://com.xunmeng.pinduoduo/orders.html?type=3'),
     ('抖音待取', 'snssdk1128://ecom_order_list'),
+    ('抖音极速版待取', 'snssdk2329://ecom_order_list'),
     ('快手待取', 'kwai://webview?url=https%3A%2F%2Fapp.kwaixiaodian.com%2Fpage%2Fkwaishop-trade-order-list-app%3FlayoutType%3D4%26hyId%3DkwaishopOrder'),
     ('得物待取', 'dewuapp://m.dewu.com/router/order/buyer/orderList?tabId=0'),
     ('小红书待取', 'xhsdiscover://home/store')
@@ -148,7 +149,7 @@ actions_2 = [
             'GroupingIdentifier': menu_uuid_2,
             'WFControlFlowMode': 0,
             'WFMenuItems': [title for title, _ in s2_items],
-            'WFMenuPrompt': '请选择查件入口 (9大平台入口)'
+            'WFMenuPrompt': '请选择查件入口 (10大平台入口)'
         }
     }
 ]
@@ -202,7 +203,7 @@ menu_inner2_uuid = str(uuid.uuid4()).upper()
 menu_inner3_uuid = str(uuid.uuid4()).upper()
 
 item1_title = '🪪 驿站身份码 (菜鸟/淘宝/京东/多多)'
-item2_title = '📦 查询快递待取 (9大电商与快递入口)'
+item2_title = '📦 查询快递待取 (10大电商与快递入口)'
 item3_title = '🚀 打开取件快码 (直达软件首页)'
 item4_title = '🌐 GitHub 项目主页 (下载/更新/关于)'
 
@@ -213,7 +214,7 @@ combo_actions = [
             'GroupingIdentifier': menu_outer_uuid,
             'WFControlFlowMode': 0,
             'WFMenuItems': [item1_title, item2_title, item3_title, item4_title],
-            'WFMenuPrompt': '取件快码 v2.0 - 请选择操作'
+            'WFMenuPrompt': '取件快码 v2.1.5 - 请选择操作'
         }
     },
     # Outer Case 1: 身份码
@@ -281,7 +282,7 @@ combo_actions.append({
         'GroupingIdentifier': menu_inner2_uuid,
         'WFControlFlowMode': 0,
         'WFMenuItems': [title for title, _ in s2_items],
-        'WFMenuPrompt': '请选择查件入口 (9大平台入口)'
+        'WFMenuPrompt': '请选择查件入口 (10大平台入口)'
     }
 })
 
@@ -403,4 +404,4 @@ for raw_name, signed_name, release_name, d in targets:
 cp_combo_release = os.path.join(release_dir, '取件快码_三合一.shortcut')
 subprocess.run(['cp', '-f', os.path.join(shortcuts_dir, '取件快码_三合一.shortcut'), cp_combo_release], check=True)
 
-print('All 3 shortcuts regenerated and signed for v2.0.0!')
+print('All 3 shortcuts regenerated and signed for v2.1.5!')

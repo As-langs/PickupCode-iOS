@@ -1,9 +1,9 @@
 # 📦 取件快码 for iOS (PickupCode)
 ## 项目交付与架构设计白皮书 (HANDOFF & Architecture Document)
 
-> **版本**：v2.0.0 (Build 2026.11.11)  
+> **版本**：v2.1.5 (Build 2026.11.14)  
 > **文档性质**：项目交接指南、系统架构设计、核心技术剖析与演进规划  
-> **编写日期**：2026-11-13  
+> **编写日期**：2026-11-14  
 > **仓库地址**：`git@github.com:As-langs/PickupCode-iOS.git`
 
 ---
@@ -30,7 +30,7 @@
   - [4.2 Plist 文件生成陷阱：“请为此操作中的每个参数选取值”之谜](#42-plist-文件生成陷阱请为此操作中的每个参数选取值之谜)
   - [4.3 短信取件地点截断与签名分离算法演进](#43-短信取件地点截断与签名分离算法演进)
 - [5. 遗留问题与后续演进建议 (Open Issues & Roadmap)](#5-遗留问题与后续演进建议-open-issues--roadmap)
-  - [5.1 京东“身份码”跳转订单优化方案选择（核心遗留）](#51-京东身份码跳转订单优化方案选择核心遗留)
+  - [5.1 京东“身份码”跳转订单优化方案选择（✅ v2.1.5 已实现方案B）](#51-京东身份码跳转订单优化方案选择核心遗留)
   - [5.2 iPadOS 专有分栏与横屏大网格适配](#52-ipados-专有分栏与横屏大网格适配)
   - [5.3 剪贴板静默探针与自动气泡提示](#53-剪贴板静默探针与自动气泡提示)
   - [5.4 快捷指令线上版本感知与云端同步](#54-快捷指令线上版本感知与云端同步)
@@ -86,7 +86,7 @@
                                  │
 ┌────────────────────────────────▼────────────────────────────────┐
 │                     Core Data & Protocols                       │
-│  Models.swift : 13大入口模型、Scheme配置表、PickupRecord结构体    │
+│  Models.swift : 14大入口模型、Scheme配置表、PickupRecord结构体    │
 │  Info.plist : LSApplicationQueriesSchemes 白名单 + QuickActions │
 └────────────────────────────────┬────────────────────────────────┘
                                  │
@@ -190,7 +190,7 @@ class JumpManager {
 在 `Models.swift` 中，精心维护了各大主流电商与物流平台的精确路由表：
 
 ```swift
-// 13 大入口枚举与 Schemes 配置
+// 14 大入口枚举与 Schemes 配置
 public enum EntryKey: String, CaseIterable, Codable {
     // 4 大身份码
     case cainiaoCode = "cainiao_code"
@@ -198,16 +198,17 @@ public enum EntryKey: String, CaseIterable, Codable {
     case jdCode      = "jd_code"
     case pddCode     = "pdd_code"
     
-    // 9 大快递待取
-    case taobaoPending   = "taobao_pending"
-    case taobaoCainiao   = "taobao_cainiao"
-    case jdPending       = "jd_pending"
-    case pddExpress      = "pdd_express"
-    case pddPending      = "pdd_pending"
-    case douyinPending   = "douyin_pending"
-    case kuaishouPending = "kuaishou_pending"
-    case dewuPending     = "dewu_pending"
-    case xhsPending      = "xhs_pending"
+    // 10 大快递待取（v2.1.5 新增抖音极速版）
+    case taobaoPending      = "taobao_pending"
+    case taobaoCainiao      = "taobao_cainiao"
+    case jdPending          = "jd_pending"
+    case pddExpress         = "pdd_express"
+    case pddPending         = "pdd_pending"
+    case douyinPending      = "douyin_pending"
+    case douyinLitePending  = "douyin_lite_pending"   // 🆕 v2.1.5
+    case kuaishouPending    = "kuaishou_pending"
+    case dewuPending        = "dewu_pending"
+    case xhsPending         = "xhs_pending"
 }
 ```
 
@@ -217,6 +218,8 @@ public enum EntryKey: String, CaseIterable, Codable {
 * **拼多多身份码**：`pinduoduo://com.xunmeng.pinduoduo/mdkd/package?tab=ID_CODE&entry_source=11&refer_page_name=login&refer_page_sn=10169`
 * **淘宝待收货**：`taobao://m.taobao.com/tbopen/index.html?action=ali.open.nav&h5Url=https%3A%2F%2Fh5.m.taobao.com%2Fawp%2Fmtb%2Folist.htm%3FtabCode%3DwaitConfirm`
 * **淘宝菜鸟校园/驿站**：`taobao://m.taobao.com/tbopen/index.html?h5Url=https%3A%2F%2Fpages-fast.m.taobao.com%2Fwow%2Fz%2Funiapp%2F1100333%2Flast-mile-fe%2Fm-end-school-tab%2Fhome`
+* **京东待取**（v2.1.5 优化）：`openapp.jdmobile://virtual?params={"category":"jump","des":"orderlist","orderStatus":"3","tabIndex":"1"}` → 直达「待收货」分类
+* **抖音极速版待取**（v2.1.5 新增）：`snssdk2329://ecom_order_list`（与普通抖音 `snssdk1128://` 独立并列）
 
 ---
 
@@ -224,40 +227,40 @@ public enum EntryKey: String, CaseIterable, Codable {
 
 用户复制一条杂乱的快递短信（如 `【菜鸟驿站】您的极兔包裹已到东门3号柜，请凭 1-2-3045 尽快领取`）后，引擎能自动化、高容错地抽取三大元数据：**快递公司、取件码、存放位置**。
 
-核心解析三步法：
+> [!NOTE]
+> **v2.1.5 重要升级**：解析引擎已完全对齐 Android 2.1.5 `CodeExtractor` + `CodeMeta` 算法，准确度大幅提升。
+
+#### v2.1.5 解析引擎核心升级点
+
+1. **全角字符归一化**（`normalize()` 静态方法）：将全角数字 `０-９`、全角字母 `Ａ-Ｚ/ａ-ｚ`、全角连字符 `－` 统一映射为半角，消除用户复制内容中的排版干扰。
+
+2. **单位词过滤**：在验证候选码时，自动排除紧跟门牌/楼层单位词的纯数字（`号`/`栋`/`幢`/`楼`/`室`/`层`/`座`/`单`/`米`/`#`），防止误识别楼号门牌。
+
+3. **多模式带权正则（LABELLED 优先）**：
+   ```
+   LABELLED     →  "取件码/提货码/凭码..." + 分隔符 + 候选码（最高优先级）
+   THREE        →  X-X-XXXXX 三段连字符格式（菜鸟标准格式）
+   LETTER_THREE →  字母开头的三段格式（如 A-1-2345）
+   FOUR         →  四段码或字母数字混合长码
+   TWO          →  两段短码（如 12-3456）
+   LETTER_DASH  →  字母+连字符+数字（如 SF-1234）
+   BARE         →  纯数字兜底（4-8位）
+   ```
+
+4. **26 大承运商品牌识别**（`couriers` 静态数组，对齐 Android `CodeMeta.COURIERS`）：顺丰、菜鸟、中通、圆通、韵达、申通、京东、极兔、丰巢、EMS、德邦等。
+
+5. **四模式地点提取**（`extractPlace()` 静态方法）：动词引导、实体后缀、地址标签、柜号抽取——对齐 Android `CodeMeta.place()` 四个正则 Pattern。
+
+#### 核心解析三步法（v2.1.5）
 
 ```swift
-func parse(text: String) -> PickupRecord? {
-    let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
-    guard !trimmed.isEmpty else { return nil }
-    
-    // 步骤 0：分离短信签名抬头（避免签名干扰正文截取，如【顺丰速运】、【菜鸟驿站】）
-    var signature: String? = nil
-    var body = trimmed
-    if let sigRange = trimmed.range(of: #"^[【\[][^】\]]+[】\]]"#, options: .regularExpression) {
-        let fullSig = String(trimmed[sigRange])
-        signature = fullSig.trimmingCharacters(in: CharacterSet(charactersIn: "【】[]")).trim()
-        body = String(trimmed[sigRange.upperBound...]).trim()
-    }
-    
-    // 步骤 1：承运商品牌多级识别（正文显式公司 > 签名品牌 > 自提网络品牌 > 正文自提）
-    var matchedCompany = identifyCompany(body: body, signature: signature)
-    
-    // 步骤 2：多级正则提取取件码（支持连字符、井号柜号、纯数字、字母数字混合）
-    let codePatterns = [
-        "(?:取件码|提货码|出库码|凭码|取货码|验证码|凭)[：:\\s]*([A-Za-z0-9\\-—_#号]{2,15})",
-        "\\b(\\d{1,4}[-—_#号]\\d{1,4}[-—_#号]\\d{1,5})\\b", // 1-2-3045
-        "\\b([A-Za-z]{1,2}[-—_#号]?\\d{2,6})\\b",             // A-1234
-        "\\b(\\d{1,3}[-—_#号]\\d{2,6})\\b",                  // 12-3456
-        "\\b(\\d{5,8})\\b"                                    // 纯数字码
-    ]
-    var matchedCode = matchRegex(patterns: codePatterns, in: trimmed)
-    guard !matchedCode.isEmpty else { return nil }
-    
-    // 步骤 3：自提点与柜号位置提取（双模式扫描：引导词贪婪定位 + 物理实体后缀匹配）
-    var matchedLocation = extractLocation(body: body, signature: signature)
-    
-    return PickupRecord(code: matchedCode, company: matchedCompany, location: matchedLocation, rawText: trimmed)
+static func parse(text: String) -> PickupRecord? {
+    let normalized = normalize(text)        // Step 0: 全角归一化
+    let code     = extractCode(from: normalized)  // Step 1: 多模式带权码提取
+    guard let code else { return nil }
+    let place    = extractPlace(from: normalized) // Step 2: 四模式地点提取
+    let company  = extractCompany(from: text)     // Step 3: 承运商品牌匹配
+    return PickupRecord(code: code, company: company, location: place, rawText: text)
 }
 ```
 
@@ -270,6 +273,8 @@ App 提供 1 列（经典卡片）、2 列（平衡兼顾）、3 列（极致紧
 * **青简**（清新雅致绿意，主色 `#00A870`）
 * **雾青**（现代毛玻璃质感，主色 `#2D9CDB`）
 * **素白**（极简克制黑白灰，主色 `#333333`）
+
+副标题 v2.1.5 更新为：**「四个身份码 · 十个查件入口」**（v2.0.0 为「九个」）。
 
 在多列网格模式下，UI 会智能切换为纵向排布，平台图标放大居中，标题置于正下方，保证在任何屏幕宽度下标题文字都不会被挤压省略：
 
@@ -301,6 +306,36 @@ if isCompactGrid {
 2. **隐藏单个入口**：
    * **快捷入口**：主界面长按任意卡片，弹出 ContextMenu，点击「隐藏此入口」即可瞬间隐藏。
    * **全局管理**：在设置页中通过勾选开关自由控制各卡片显隐，提供「全部显示」一键重置按钮。
+
+### 3.4b 取件码移动与已取状态自动沉底（v2.1.5 新增）
+
+> [!NOTE]
+> v2.1.5 新增功能，对齐 Android 2.1.5 `CodeStore.move()` 与 `CodesActivity` 移动菜单逻辑。
+
+#### 移动功能三种操作方式
+
+| 操作 | 触发方式 | 说明 |
+| :--- | :--- | :--- |
+| **上移 / 下移 / 置顶** | 长按取件码卡片 → 弹出 ContextMenu | 仅在同组内（待取↔待取、已取↔已取）调换位置，不跨组 |
+| **内联箭头按钮** | 点击右上角「移动」按钮进入移动模式 | 每行显示 ↑↓ 按钮，快速调整相邻顺序 |
+| **拖拽排序弹窗** | 长按卡片菜单 → 「拖拽列表排序」 | 弹出 Sheet，SwiftUI `List` 原生 `onMove`，精细拖拽 |
+
+#### 已取件自动沉底逻辑
+
+```swift
+// PickupCodeManager.swift - togglePicked() 核心逻辑
+func togglePicked(id: UUID) {
+    guard let idx = records.firstIndex(where: { $0.id == id }) else { return }
+    records[idx].isPicked.toggle()
+    sortPendingFirst()   // 待取全部排在前，已取排在后
+    save()
+}
+
+// sortPendingFirst(): 取件记录分两组，pending 组在前、taken 组在后
+// move(id:direction:): 只在同一 isPicked 组内交换，不越组
+```
+
+列表视图分两个视觉区：**待取 N / 共 N 徽标 header** + 若有已取件则显示 **「已取件 (N)」section + 一键清理**。
 
 ```swift
 // ThemeManager.swift 中的状态持久化
@@ -419,7 +454,7 @@ set -e
 
 ## 5. 遗留问题与后续演进建议 (Open Issues & Roadmap)
 
-### 5.1 京东“身份码”跳转订单优化方案选择（核心遗留）
+### 5.1 京东“身份码”跳转订单优化方案选择（✅ v2.1.5 已实现方案B）
 
 > [!IMPORTANT]
 > **现状背景**：用户反馈在 iPad 上点击「京东身份码」跳转的并非身份码，而是京东的“我的订单”列表。  
@@ -473,23 +508,23 @@ git log -3 --stat
 # 4. 提交代码并推送至 GitHub main 分支与最新 Release 标签
 git add .
 git commit -m "feat/fix: your commit message"
-git tag -f v2.0.0
+git tag -f v2.1.5
 git push origin main
-git push origin v2.0.0 --force
+git push origin v2.1.5 --force
 ```
 
 ### 交付物核对表 (Deliverables Checklist)
 
 - [x] **iOS App 源代码**：完整 SwiftUI 工程架构与资产文件 (`PickupCode/`)
 - [x] **Xcode 工程文件**：`PickupCode.xcodeproj`（已同步编译构建配置）
-- [x] **已编译 IPA 离线包**：`release_assets/取件快码-2.0.0.ipa` (747KB)
+- [x] **已编译 IPA 离线包**：`release_assets/取件快码-2.1.5.ipa` (781KB)
 - [x] **官方加密签名快捷指令**：
   - `release_assets/取件快码_三合一.shortcut`
   - `release_assets/PickupCode_ID_取件身份码.shortcut`
   - `release_assets/PickupCode_Packages_快递待取.shortcut`
 - [x] **自动化流水线脚本**：`build_ipa.sh`, `build_shortcuts.py`, `generate_pbxproj.py`
 - [x] **开源文档与发布说明**：`README.md`, `RELEASE_NOTES.md`, `HANDOFF.md`
-- [x] **远程仓库同步**：GitHub 仓库 `origin/main` 与 `v2.0.0` Release Tag 保持同步
+- [x] **远程仓库同步**：GitHub 仓库 `origin/main` 与 `v2.1.5` Release Tag 保持同步
 
 ---
 

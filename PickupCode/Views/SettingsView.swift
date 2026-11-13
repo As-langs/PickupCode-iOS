@@ -121,14 +121,14 @@ struct SettingsView: View {
                                         .font(.system(size: 16, weight: .bold))
                                         .foregroundColor(isDarkMode ? .white : Color(hex: "1F2937"))
                                     
-                                    Text("版本 2.0.0 (Build 2026.11.11)")
+                                    Text("版本 2.1.5 (Build 2026.11.14)")
                                         .font(.system(size: 12))
                                         .foregroundColor(secondaryTextColor)
                                 }
                                 
                                 Spacer()
                                 
-                                Text("v2.0.0")
+                                Text("v2.1.5")
                                     .font(.system(size: 12, weight: .bold, design: .rounded))
                                     .foregroundColor(accentColor)
                                     .padding(.horizontal, 8)

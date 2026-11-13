@@ -2,6 +2,7 @@
 set -e
 
 PROJ_DIR="/Users/zouh/.gemini/antigravity/scratch/PickupCode-iOS"
+VERSION="2.1.5"
 cd "$PROJ_DIR"
 
 echo "=== 1. Cleaning previous builds ==="
@@ -19,10 +20,12 @@ xcodebuild clean build \
   CODE_SIGNING_ALLOWED=NO
 
 echo "=== 3. Compiling PickupCodeWidget with swiftc ==="
+mkdir -p /tmp/clang-module-cache
 xcrun --sdk iphoneos swiftc \
   -target arm64-apple-ios16.0 \
   -O \
   -parse-as-library \
+  -module-cache-path /tmp/clang-module-cache \
   -emit-executable \
   -o "$PROJ_DIR/PickupCodeWidget/PickupCodeWidget" \
   "$PROJ_DIR/PickupCodeWidget/PickupCodeWidget.swift" \
@@ -53,15 +56,15 @@ codesign -s - --force "$WIDGET_DIR" || true
 
 echo "=== 5. Zipping IPA ==="
 cd ipa_build
-zip -qry ../PickupCode-2.0.0.ipa Payload
+zip -qry "../PickupCode-${VERSION}.ipa" Payload
 cd ..
-cp PickupCode-2.0.0.ipa 取件快码-2.0.0.ipa
+cp "PickupCode-${VERSION}.ipa" "取件快码-${VERSION}.ipa"
 
 mkdir -p release_assets
-cp PickupCode-2.0.0.ipa release_assets/
-cp 取件快码-2.0.0.ipa release_assets/
-cp PickupCode-2.0.0.ipa /Users/zouh/Downloads/ 2>/dev/null || true
-cp 取件快码-2.0.0.ipa /Users/zouh/Downloads/ 2>/dev/null || true
+cp "PickupCode-${VERSION}.ipa" release_assets/
+cp "取件快码-${VERSION}.ipa" release_assets/
+cp "PickupCode-${VERSION}.ipa" /Users/zouh/Downloads/ 2>/dev/null || true
+cp "取件快码-${VERSION}.ipa" /Users/zouh/Downloads/ 2>/dev/null || true
 
 echo "=== 6. Build Completed ==="
-ls -lh PickupCode-2.0.0.ipa 取件快码-2.0.0.ipa release_assets/
+ls -lh "PickupCode-${VERSION}.ipa" "取件快码-${VERSION}.ipa" release_assets/

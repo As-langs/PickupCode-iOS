@@ -12,13 +12,14 @@ enum EntryKey: String, CaseIterable, Identifiable, Codable {
     case pddCode            = "pdd_code"
     case jdCode             = "jd_code"
     
-    // 快递与订单待收货 (9个)
+    // 快递与订单待收货 (10个)
     case taobaoCainiaoPending = "taobao_cainiao_pending"
     case pddPickup          = "pdd_pickup"
     case taobaoPending      = "taobao_pending"
     case pddPending         = "pdd_pending"
     case jdPending          = "jd_pending"
     case douyinPending      = "douyin_pending"
+    case douyinLitePending  = "douyin_lite_pending"
     case kuaishouPending    = "kuaishou_pending"
     case dewuPending        = "dewu_pending"
     case xhsPending         = "xhs_pending"
@@ -46,6 +47,7 @@ enum EntryKey: String, CaseIterable, Identifiable, Codable {
         case .pddPending:           return "拼多多待收货"
         case .jdPending:            return "京东待取"
         case .douyinPending:        return "抖音待取"
+        case .douyinLitePending:    return "抖音极速版待取"
         case .kuaishouPending:      return "快手待取"
         case .dewuPending:          return "得物待取"
         case .xhsPending:           return "小红书待取"
@@ -68,7 +70,7 @@ enum EntryKey: String, CaseIterable, Identifiable, Codable {
             return "直达待收货包裹"
         case .jdPending:
             return "查看待取包裹"
-        case .douyinPending, .kuaishouPending, .dewuPending, .xhsPending:
+        case .douyinPending, .douyinLitePending, .kuaishouPending, .dewuPending, .xhsPending:
             return "查看订单物流"
         }
     }
@@ -83,7 +85,7 @@ enum EntryKey: String, CaseIterable, Identifiable, Codable {
             return "ic_jd"
         case .pddCode, .pddPickup, .pddPending:
             return "ic_pinduoduo"
-        case .douyinPending:
+        case .douyinPending, .douyinLitePending:
             return "ic_douyin"
         case .kuaishouPending:
             return "ic_kuaishou"
@@ -113,9 +115,11 @@ enum EntryKey: String, CaseIterable, Identifiable, Codable {
         case .pddPending:
             return "已直达拼多多待收货订单列表"
         case .jdPending:
-            return "已打开京东订单列表，点开订单查看物流"
+            return "已打开京东订单页，若不在「待收货」，点一下顶部的「待收货」"
         case .douyinPending:
             return "已打开抖音订单列表，可看待收货与物流"
+        case .douyinLitePending:
+            return "已打开抖音极速版订单列表，可看待收货与物流"
         case .kuaishouPending:
             return "已打开快手小店订单列表"
         case .dewuPending:
@@ -176,7 +180,10 @@ enum EntryKey: String, CaseIterable, Identifiable, Codable {
             ]
         case .jdPending:
             return [
+                "openapp.jdmobile://virtual?params=%7B%22category%22%3A%22jump%22%2C%22des%22%3A%22orderlist%22%2C%22orderStatus%22%3A%223%22%7D",
+                "openapp.jdmobile://virtual?params=%7B%22category%22%3A%22jump%22%2C%22des%22%3A%22orderlist%22%2C%22tabIndex%22%3A%221%22%7D",
                 "openapp.jdmobile://virtual?params=%7B%22category%22%3A%22jump%22%2C%22des%22%3A%22orderlist%22%7D",
+                "openapp.jdmobile://virtual?params=%7B%22category%22%3A%22jump%22%2C%22des%22%3A%22myJd%22%7D",
                 "openjd://virtual?params=%7B%22category%22%3A%22jump%22%2C%22des%22%3A%22orderlist%22%7D",
                 "openapp.jdmobile://"
             ]
@@ -185,6 +192,13 @@ enum EntryKey: String, CaseIterable, Identifiable, Codable {
                 "snssdk1128://ecom_order_list",
                 "snssdk1128://wallet",
                 "snssdk1128://"
+            ]
+        case .douyinLitePending:
+            return [
+                "snssdk2329://ecom_order_list",
+                "snssdk2329://wallet",
+                "snssdk2329://feed",
+                "snssdk2329://"
             ]
         case .kuaishouPending:
             return [
@@ -231,7 +245,7 @@ enum EntryKey: String, CaseIterable, Identifiable, Codable {
             return "https://m.pinduoduo.net/mdkd/package?entry_source=18&extra_params=from_wx_jump%3D1&p_channel=0"
         case .taobaoPending:
             return "https://h5.m.taobao.com/awp/mtb/olist.htm?tabCode=waitConfirm"
-        case .douyinPending:
+        case .douyinPending, .douyinLitePending:
             return "https://haohuo.jinritemai.com/views/order/list"
         case .kuaishouPending:
             return "https://app.kwaixiaodian.com/page/kwaishop-trade-order-list-app?layoutType=4&hyId=kwaishopOrder"

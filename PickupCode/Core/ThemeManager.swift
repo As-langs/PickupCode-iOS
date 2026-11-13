@@ -82,6 +82,7 @@ class ThemeManager: ObservableObject {
         .pddPending,
         .jdPending,
         .douyinPending,
+        .douyinLitePending,
         .kuaishouPending,
         .dewuPending,
         .xhsPending

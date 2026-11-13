@@ -6,6 +6,8 @@ struct PickupCodeSectionView: View {
     @Environment(\.colorScheme) var systemColorScheme
     
     @State private var showingManualAdd = false
+    @State private var showingReorderSheet = false
+    @State private var isReordering = false
     @State private var inputCode = ""
     @State private var inputCompany = ""
     @State private var inputLocation = ""
@@ -16,6 +18,14 @@ struct PickupCodeSectionView: View {
             return mode == .dark
         }
         return systemColorScheme == .dark
+    }
+    
+    private var pendingRecords: [PickupRecord] {
+        manager.records.filter { !$0.isPicked }
+    }
+    
+    private var takenRecords: [PickupRecord] {
+        manager.records.filter { $0.isPicked }
     }
     
     var body: some View {
@@ -30,18 +40,58 @@ struct PickupCodeSectionView: View {
                     .font(.system(size: 17, weight: .bold, design: .rounded))
                     .foregroundColor(primaryTextColor)
                 
+                if !manager.records.isEmpty {
+                    Text("待取 \(pendingRecords.count) / 共 \(manager.records.count)")
+                        .font(.system(size: 11, weight: .semibold, design: .rounded))
+                        .foregroundColor(themeAccentColor)
+                        .padding(.horizontal, 7)
+                        .padding(.vertical, 3)
+                        .background(themeAccentColor.opacity(0.12))
+                        .clipShape(Capsule())
+                }
+                
                 Spacer()
                 
                 if !manager.records.isEmpty {
+                    Button {
+                        withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                            isReordering.toggle()
+                        }
+                    } label: {
+                        HStack(spacing: 4) {
+                            Image(systemName: isReordering ? "checkmark" : "arrow.up.arrow.down")
+                                .font(.system(size: 11, weight: .semibold))
+                            Text(isReordering ? "完成" : "移动")
+                                .font(.system(size: 12, weight: .semibold))
+                        }
+                        .foregroundColor(isReordering ? .white : themeAccentColor)
+                        .padding(.horizontal, 9)
+                        .padding(.vertical, 5)
+                        .background(isReordering ? themeAccentColor : themeAccentColor.opacity(0.12))
+                        .clipShape(Capsule())
+                    }
+                    
                     Menu {
+                        Button {
+                            showingReorderSheet = true
+                        } label: {
+                            Label("拖拽列表排序", systemImage: "line.3.horizontal")
+                        }
+                        
+                        Divider()
+                        
                         Button(role: .destructive) {
-                            manager.clearPicked()
+                            withAnimation {
+                                manager.clearPicked()
+                            }
                         } label: {
                             Label("清理已取件", systemImage: "checkmark.circle")
                         }
                         
                         Button(role: .destructive) {
-                            manager.clearAll()
+                            withAnimation {
+                                manager.clearAll()
+                            }
                         } label: {
                             Label("清空所有记录", systemImage: "trash")
                         }
@@ -54,7 +104,7 @@ struct PickupCodeSectionView: View {
             }
             .padding(.horizontal, 2)
             
-            Text("分享、粘贴或手打一段文字，自动挑出码；只存本机")
+            Text("分享或粘贴短信自动挑出码；点击勾选标记已取并移至下方")
                 .font(.system(size: 12, weight: .regular))
                 .foregroundColor(secondaryTextColor)
                 .padding(.leading, 2)
@@ -107,8 +157,32 @@ struct PickupCodeSectionView: View {
                 emptyStateView
             } else {
                 VStack(spacing: 10) {
-                    ForEach(manager.records) { record in
+                    // 待取件列表（始终置顶）
+                    ForEach(pendingRecords) { record in
                         recordRow(record)
+                    }
+                    
+                    // 已取件列表（如果存在）
+                    if !takenRecords.isEmpty {
+                        HStack {
+                            Text("已取件 (\(takenRecords.count))")
+                                .font(.system(size: 12, weight: .semibold))
+                                .foregroundColor(secondaryTextColor)
+                            Spacer()
+                            Button("一键清理") {
+                                withAnimation {
+                                    manager.clearPicked()
+                                }
+                            }
+                            .font(.system(size: 11, weight: .medium))
+                            .foregroundColor(secondaryTextColor.opacity(0.8))
+                        }
+                        .padding(.top, 6)
+                        .padding(.horizontal, 4)
+                        
+                        ForEach(takenRecords) { record in
+                            recordRow(record)
+                        }
                     }
                 }
             }
@@ -116,18 +190,23 @@ struct PickupCodeSectionView: View {
         .sheet(isPresented: $showingManualAdd) {
             manualAddSheet
         }
+        .sheet(isPresented: $showingReorderSheet) {
+            reorderSheet
+        }
     }
     
     // MARK: - Record Row
     
     @ViewBuilder
     private func recordRow(_ record: PickupRecord) -> some View {
-        HStack(alignment: .center, spacing: 14) {
-            // Checkmark button
+        HStack(alignment: .center, spacing: 12) {
+            // Checkmark button (点击瞬间沉底或恢复)
             Button(action: {
                 let haptic = UISelectionFeedbackGenerator()
                 haptic.selectionChanged()
-                manager.togglePicked(id: record.id)
+                withAnimation(.spring(response: 0.35, dampingFraction: 0.75)) {
+                    manager.togglePicked(id: record.id)
+                }
             }) {
                 Image(systemName: record.isPicked ? "checkmark.circle.fill" : "circle")
                     .font(.system(size: 22))
@@ -144,10 +223,10 @@ struct PickupCodeSectionView: View {
                     
                     Text(record.company)
                         .font(.system(size: 11, weight: .semibold))
-                        .foregroundColor(themeAccentColor)
+                        .foregroundColor(record.isPicked ? secondaryTextColor : themeAccentColor)
                         .padding(.horizontal, 6)
                         .padding(.vertical, 2)
-                        .background(themeAccentColor.opacity(0.12))
+                        .background(record.isPicked ? secondaryTextColor.opacity(0.12) : themeAccentColor.opacity(0.12))
                         .clipShape(Capsule())
                 }
                 
@@ -164,43 +243,170 @@ struct PickupCodeSectionView: View {
             
             Spacer()
             
-            // Copy Code Button
-            Button(action: {
-                UIPasteboard.general.string = record.code
-                let haptic = UINotificationFeedbackGenerator()
-                haptic.notificationOccurred(.success)
-                JumpManager.shared.toastMessage = "已复制取件码：\(record.code)"
-            }) {
-                Image(systemName: "doc.on.doc")
-                    .font(.system(size: 14, weight: .medium))
-                    .foregroundColor(themeAccentColor)
-                    .padding(8)
-                    .background(themeAccentColor.opacity(0.1))
-                    .clipShape(Circle())
-            }
-            .buttonStyle(ScaleButtonStyle())
-            
-            // Delete button
-            Button(action: {
-                withAnimation {
-                    manager.delete(id: record.id)
+            if isReordering {
+                // 上移/下移排序按钮
+                HStack(spacing: 6) {
+                    Button {
+                        let haptic = UIImpactFeedbackGenerator(style: .light)
+                        haptic.impactOccurred()
+                        withAnimation(.spring(response: 0.3, dampingFraction: 0.75)) {
+                            manager.moveUp(id: record.id)
+                        }
+                    } label: {
+                        Image(systemName: "chevron.up")
+                            .font(.system(size: 12, weight: .bold))
+                            .foregroundColor(themeAccentColor)
+                            .padding(7)
+                            .background(themeAccentColor.opacity(0.1))
+                            .clipShape(Circle())
+                    }
+                    .buttonStyle(.plain)
+                    
+                    Button {
+                        let haptic = UIImpactFeedbackGenerator(style: .light)
+                        haptic.impactOccurred()
+                        withAnimation(.spring(response: 0.3, dampingFraction: 0.75)) {
+                            manager.moveDown(id: record.id)
+                        }
+                    } label: {
+                        Image(systemName: "chevron.down")
+                            .font(.system(size: 12, weight: .bold))
+                            .foregroundColor(themeAccentColor)
+                            .padding(7)
+                            .background(themeAccentColor.opacity(0.1))
+                            .clipShape(Circle())
+                    }
+                    .buttonStyle(.plain)
                 }
-            }) {
-                Image(systemName: "trash")
-                    .font(.system(size: 13))
-                    .foregroundColor(secondaryTextColor.opacity(0.6))
-                    .padding(6)
+            } else {
+                // 复制取件码快捷按钮
+                Button(action: {
+                    UIPasteboard.general.string = record.code
+                    let haptic = UINotificationFeedbackGenerator()
+                    haptic.notificationOccurred(.success)
+                    JumpManager.shared.toastMessage = "已复制取件码：\(record.code)"
+                }) {
+                    Image(systemName: "doc.on.doc")
+                        .font(.system(size: 14, weight: .medium))
+                        .foregroundColor(record.isPicked ? secondaryTextColor : themeAccentColor)
+                        .padding(8)
+                        .background(record.isPicked ? secondaryTextColor.opacity(0.1) : themeAccentColor.opacity(0.1))
+                        .clipShape(Circle())
+                }
+                .buttonStyle(ScaleButtonStyle())
+                
+                // 删除按钮
+                Button(action: {
+                    withAnimation {
+                        manager.delete(id: record.id)
+                    }
+                }) {
+                    Image(systemName: "trash")
+                        .font(.system(size: 13))
+                        .foregroundColor(secondaryTextColor.opacity(0.6))
+                        .padding(6)
+                }
+                .buttonStyle(.plain)
             }
-            .buttonStyle(.plain)
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 14)
-        .background(cardBackground)
+        .background(record.isPicked ? cardBackground.opacity(0.6) : cardBackground)
         .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
         .overlay(
             RoundedRectangle(cornerRadius: 16, style: .continuous)
                 .stroke(cardBorderColor, lineWidth: 1)
         )
+        .contextMenu {
+            Button {
+                withAnimation {
+                    manager.togglePicked(id: record.id)
+                }
+            } label: {
+                Label(record.isPicked ? "标记为待取" : "标记为已取", systemImage: record.isPicked ? "circle" : "checkmark.circle")
+            }
+            
+            Button {
+                withAnimation {
+                    manager.moveUp(id: record.id)
+                }
+            } label: {
+                Label("向上移动", systemImage: "arrow.up")
+            }
+            
+            Button {
+                withAnimation {
+                    manager.moveDown(id: record.id)
+                }
+            } label: {
+                Label("向下移动", systemImage: "arrow.down")
+            }
+            
+            Button {
+                withAnimation {
+                    manager.moveToTop(id: record.id)
+                }
+            } label: {
+                Label("置顶取件码", systemImage: "arrow.up.to.line")
+            }
+            
+            Divider()
+            
+            Button {
+                UIPasteboard.general.string = record.code
+                JumpManager.shared.toastMessage = "已复制取件码：\(record.code)"
+            } label: {
+                Label("复制取件码", systemImage: "doc.on.doc")
+            }
+            
+            Button(role: .destructive) {
+                withAnimation {
+                    manager.delete(id: record.id)
+                }
+            } label: {
+                Label("删除", systemImage: "trash")
+            }
+        }
+    }
+    
+    // MARK: - Reorder Sheet
+    
+    private var reorderSheet: some View {
+        NavigationStack {
+            List {
+                Section(header: Text("长按右侧把手上下拖动排序，调整代取路线")) {
+                    ForEach(manager.records) { item in
+                        HStack(spacing: 12) {
+                            Image(systemName: item.isPicked ? "checkmark.circle.fill" : "circle")
+                                .foregroundColor(item.isPicked ? secondaryTextColor : themeAccentColor)
+                            
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(item.code)
+                                    .font(.system(size: 16, weight: .bold, design: .monospaced))
+                                    .strikethrough(item.isPicked)
+                                Text("\(item.company) · \(item.location)")
+                                    .font(.system(size: 12))
+                                    .foregroundColor(secondaryTextColor)
+                            }
+                        }
+                    }
+                    .onMove { source, destination in
+                        manager.moveItem(fromOffsets: source, toOffset: destination)
+                    }
+                }
+            }
+            .navigationTitle("取件码顺序调整")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("完成") {
+                        showingReorderSheet = false
+                    }
+                    .fontWeight(.semibold)
+                }
+            }
+            .environment(\.editMode, .constant(.active))
+        }
     }
     
     // MARK: - Empty State

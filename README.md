@@ -127,8 +127,11 @@ PickupCode-iOS/
 ├── Shortcuts/                    # 苹果官方加密签名的 3 款快捷指令
 ├── build_ipa.sh                  # 自动化编译、签名与打包脚本
 ├── build_shortcuts.py            # 快捷指令生成与官方签名脚本
-└── generate_pbxproj.py           # Xcode 工程配置同步脚本
+├── generate_pbxproj.py           # Xcode 工程配置同步脚本
+└── HANDOFF.md                    # 完整架构设计与项目交接技术白皮书
 ```
+
+> 📖 **架构设计与交接白皮书**：如需深入了解系统架构分层、URL Scheme 调度原理、短信正则算法、快捷指令签名机制与遗留技术讨论，请参阅完整文档 [HANDOFF.md](HANDOFF.md)。
 
 ---
 

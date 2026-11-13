@@ -11,7 +11,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Release-v2.1.5-brightgreen.svg" alt="Release">
+  <a href="https://github.com/As-langs/PickupCode-iOS/releases"><img src="https://img.shields.io/badge/Release-v2.1.5-brightgreen.svg" alt="Release"></a>
   <img src="https://img.shields.io/badge/Platform-iOS%2016.0%2B-blue.svg" alt="Platform">
   <img src="https://img.shields.io/badge/Language-Swift%205-orange.svg" alt="Language">
   <img src="https://img.shields.io/badge/UI-SwiftUI-green.svg" alt="SwiftUI">

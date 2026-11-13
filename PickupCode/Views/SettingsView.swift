@@ -128,8 +128,17 @@ struct SettingsView: View {
                                 
                                 Spacer()
                                 
-                                Text("v2.1.5")
-                                    .font(.system(size: 12, weight: .bold, design: .rounded))
+                                Button {
+                                    if let url = URL(string: "https://github.com/As-langs/PickupCode-iOS/releases") {
+                                        UIApplication.shared.open(url)
+                                    }
+                                } label: {
+                                    HStack(spacing: 4) {
+                                        Text("v2.1.5")
+                                            .font(.system(size: 12, weight: .bold, design: .rounded))
+                                        Image(systemName: "arrow.up.right")
+                                            .font(.system(size: 9))
+                                    }
                                     .foregroundColor(accentColor)
                                     .padding(.horizontal, 8)
                                     .padding(.vertical, 3)
@@ -137,6 +146,7 @@ struct SettingsView: View {
                                         Capsule()
                                             .fill(accentColor.opacity(0.12))
                                     )
+                                }
                             }
                             
                             Divider()
